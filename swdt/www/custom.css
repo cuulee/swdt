@@ -1,0 +1,23 @@
+/* Remove margin from ShinyWidgets switchInput*/
+.form-group{
+	margin: 0px !important; 
+	margin-bottom: 10px !important;
+} 
+
+/* Change background color of ShinyWidgets switchInput*/
+.bootstrap-switch-handle-on.bootstrap-switch-primary{
+	background:#008cba !important;
+}
+
+/* Float session id to right in navbar */
+.navbar-text{
+	float: right !important;
+} 
+
+/* Remove unused div in data table*/
+.col-sm-5{
+	width:1% !important;
+}
+
+.col-sm-7{width:99% !important;
+}
