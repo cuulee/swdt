@@ -68,17 +68,17 @@ server <- function(input, output, session) {
     tabAOIOutput,
     tabProcessingOutput
   )
-
+  
   observe({
     #' Restrict access to tabs if content is missing
     #' 
-    if (is.na(tabAOIOutput()["uuid"][[1]])) {
+    if (is.na(tabAOIOutput()$uuid())) {
       shinyjs::disable(selector = "#navbar li a[data-value=Processing]")
     } else {
       shinyjs::enable(selector = "#navbar li a[data-value=Processing]")
     }
-
-    if (is.null(tabProcessingOutput()["r_minimum"][[1]])) {
+    
+    if (is.null(tabProcessingOutput()$temporal_statistics$minimum)) {
       shinyjs::disable(selector = "#navbar li a[data-value=\"Water Extent\"]")
     } else {
       shinyjs::enable(selector = "#navbar li a[data-value=\"Water Extent\"]")
@@ -88,8 +88,8 @@ server <- function(input, output, session) {
   output$text <- renderText({
     #' Add session info to navbar
     #'
-    req(tabAOIOutput()["uuid"][[1]])
-    tabAOIOutput()["uuid"][[1]]
+    req(tabAOIOutput()$uuid())
+    tabAOIOutput()$uuid()
   })
 }
 

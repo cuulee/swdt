@@ -69,7 +69,7 @@ tabAOI <- function(input, output, session) {
     #' 
     list(
       aoi = input$aoi,
-      uuid = uuid()
+      uuid = uuid
     )
   })
 

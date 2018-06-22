@@ -40,8 +40,8 @@ tabProcessing <- function(input, output, session, tabAOIInput) {
   files <- reactive({
     #' Creates data table with available Sentinel-1 scenes
     #'
-    files <- list.files(glue("./data/", tabAOIInput()["aoi"][[1]]), "^S1")
-    paths <- list.files(glue("./data/", tabAOIInput()["aoi"][[1]]),
+    files <- list.files(glue("./data/", tabAOIInput()$aoi), "^S1")
+    paths <- list.files(glue("./data/", tabAOIInput()$aoi),
       "^S1",
       full.names = TRUE
     )
@@ -126,9 +126,9 @@ tabProcessing <- function(input, output, session, tabAOIInput) {
     map <- read_sf(
       glue(
         "./data/",
-        tabAOIInput()["aoi"][[1]]
+        tabAOIInput()$aoi
       ),
-      tabAOIInput()["aoi"][[1]]
+      tabAOIInput()$aoi
     ) %>%
       leaflet() %>%
       addTiles() %>%
@@ -203,13 +203,13 @@ tabProcessing <- function(input, output, session, tabAOIInput) {
 
             path_min <- glue(
               "./data/fuente/minimum/minimum-",
-              tabAOIInput()["uuid"][[1]],
+              tabAOIInput()$uuid(),
               ".tif"
             )
 
             path_max <- glue(
               "./data/fuente/maximum/maximum-",
-              tabAOIInput()["uuid"][[1]],
+              tabAOIInput()$uuid(),
               ".tif"
             )
 
@@ -273,9 +273,9 @@ tabProcessing <- function(input, output, session, tabAOIInput) {
 
   tabProcessingOutput <- reactive({
     #' Module ouput
+    #' 
     list(
-      r_minimum = temporal_statistics[["minimum"]],
-      r_maximum = temporal_statistics[["maximum"]]
+      temporal_statistics = temporal_statistics
     )
   })
 

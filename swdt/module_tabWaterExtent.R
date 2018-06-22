@@ -193,29 +193,29 @@ tabWaterExtent <- function(input, output, session, tabAOIInput, tabProcessingInp
     updateProgress <- function(value = NULL, detail = NULL) {
       progress$set(value = value, detail = detail)
     }
-
+    
     # Switch between maximum and minimum raster files
     if (input$switch == "minimum") {
       r <- classify_water(
-        tabProcessingInput()["r_minimum"][[1]],
+        tabProcessingInput()$temporal_statistics$minimum,
         pass_threshold[["minimum"]],
         pass_filter(),
         pass_filter_size(),
         updateProgress
       )
 
-      raster_sentinel <- tabProcessingInput()["r_minimum"][[1]]
+      raster_sentinel <- tabProcessingInput()$temporal_statistics$minimum
       water_extent[["minimum"]] <- r
     } else if (input$switch == "maximum") {
       r <- classify_water(
-        tabProcessingInput()["r_maximum"][[1]],
+        tabProcessingInput()$temporal_statistics$maximum,
         pass_threshold[["maximum"]],
         pass_filter(),
         pass_filter_size(),
         updateProgress
       )
 
-      raster_sentinel <- tabProcessingInput()["r_maximum"][[1]]
+      raster_sentinel <- tabProcessingInput()$temporal_statistics$maximum
       water_extent[["maximum"]] <- r
     }
     progress$close()
@@ -323,7 +323,7 @@ tabWaterExtent <- function(input, output, session, tabAOIInput, tabProcessingInp
     #' while switching between minimum and maximum tab
     #'
     hist_data <- suppressWarnings(
-      hist(tabProcessingInput()["r_minimum"][[1]], breaks = 100)
+      hist(tabProcessingInput()$temporal_statistics$minimum, breaks = 100)
     )
     hist_data <-
       tibble(
@@ -339,7 +339,7 @@ tabWaterExtent <- function(input, output, session, tabAOIInput, tabProcessingInp
     #' while switching between minimum and maximum tab
     #'
     hist_data <- suppressWarnings(
-      hist(tabProcessingInput()["r_maximum"][[1]], breaks = 100)
+      hist(tabProcessingInput()$temporal_statistics$maximum, breaks = 100)
     )
     hist_data <-
       tibble(
@@ -380,4 +380,14 @@ tabWaterExtent <- function(input, output, session, tabAOIInput, tabProcessingInp
       plot + geom_vline(xintercept = pass_threshold[["maximum"]], size = 1)
     }
   })
+  
+  tabWaterExtentOutput <- reactive({
+    #' Module ouput
+    #' 
+    list(
+      water_extent = water_extent
+    )
+  })
+  
+  return(tabWaterExtentOutput)
 }
