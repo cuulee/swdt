@@ -163,7 +163,7 @@ tabProcessing <- function(input, output, session, tabAOIInput) {
     #' 
     input$calculate, {
       withProgress(
-        message = "Calculating",
+        message = "Calculation",
         detail = "Searching",
         value = 0, {
 
@@ -290,7 +290,7 @@ tabProcessing <- function(input, output, session, tabAOIInput) {
               "\')"
             ))
           } else { # Cached data available
-            incProgress(0.5, detail = "Cached data found")
+            incProgress(0.5, detail = "Data in cache")
 
             r_minimum <-
               res %>%

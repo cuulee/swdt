@@ -60,7 +60,13 @@ tabWaterExtentUI <- function(id) {
         fluidRow(
           column(
             6,
-            plotOutput(ns("histogram"), click = ns("plot_click"), height = 250)
+            withSpinner(
+              plotOutput(ns("histogram"), 
+                         click = ns("plot_click"), 
+                         height = 250),
+              type=8,
+              color="#008cba"
+            )
           ),
           column(
             1,
@@ -76,7 +82,10 @@ tabWaterExtentUI <- function(id) {
           ),
           column(
             5,
-            tableOutput(ns("statistics"))
+            withSpinner(tableOutput(ns("statistics")),
+                        type=8,
+                        color="#008cba"
+            )
           )
         ),
 
@@ -114,7 +123,7 @@ tabWaterExtent <- function(input, output, session, tabAOIInput, tabProcessingInp
   classify_water <- function(r, threshold, filter, filter_size, updateProgress) {
     #' Classify raster files based on threshold
     #'
-    updateProgress(value = 0.1, detail = "Reclassify")
+    updateProgress(value = 0.1, detail = "Classify")
 
     r <- reclassify(r, c(
       -Inf,
@@ -185,7 +194,7 @@ tabWaterExtent <- function(input, output, session, tabAOIInput, tabProcessingInp
 
     # Initialize progressbar
     progress <- shiny::Progress$new()
-    progress$set(message = "Classify", detail = "Get", value = 0)
+    progress$set(message = "Classification", detail = "Get", value = 0)
 
     updateProgress <- function(value = NULL, detail = NULL) {
       progress$set(value = value, detail = detail)

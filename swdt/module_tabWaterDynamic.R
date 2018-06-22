@@ -44,7 +44,7 @@ tabWaterDynamic <- function(input,
   compute_map <- reactive({
     #' Compute map
     #' 
-    withProgress(message = "Classify", value = 0, {
+    withProgress(message = "Classification", value = 0, {
       stack(
         tabWaterExtentInput()$water_extent$minimum,
         tabWaterExtentInput()$water_extent$maximum
