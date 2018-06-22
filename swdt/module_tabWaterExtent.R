@@ -147,12 +147,11 @@ tabWaterExtent <- function(input, output, session, tabAOIInput, tabProcessingInp
   output$statistics <- renderTable({
     #' Render table output with statistical measures
     #'
-    req(water_extent[["minimum"]])
-    req(water_extent[["maximum"]])
-
     if (input$switch == "minimum") {
+      req(water_extent[["minimum"]])
       val <- getValues(water_extent[["minimum"]])
     } else if (input$switch == "maximum") {
+      req(water_extent[["maximum"]])
       val <- getValues(water_extent[["maximum"]])
     }
 
