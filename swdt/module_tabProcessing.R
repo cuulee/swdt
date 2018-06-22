@@ -202,13 +202,17 @@ tabProcessing <- function(input, output, session, tabAOIInput) {
               raster::stack()
 
             path_min <- glue(
-              "./data/fuente/minimum/minimum-",
+              "./data/",
+              tabAOIInput()$aoi,
+              "/minimum/minimum-",
               tabAOIInput()$uuid(),
               ".tif"
             )
 
             path_max <- glue(
-              "./data/fuente/maximum/maximum-",
+              "./data/",
+              tabAOIInput()$aoi,
+              "/maximum/maximum-",
               tabAOIInput()$uuid(),
               ".tif"
             )
