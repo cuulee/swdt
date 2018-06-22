@@ -43,8 +43,6 @@ tabAOI <- function(input, output, session) {
     input$aoi %>%
       glue("-", UUIDgenerate()) %>%
       uuid()
-
-    output$info <- renderText(uuid())
   })
 
   output$map <- renderLeaflet({
