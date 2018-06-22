@@ -7,6 +7,7 @@ library(shiny)
 library(shinyjs)
 library(shinyWidgets)
 library(shinycssloaders)
+library(colourpicker)
 library(DT)
 library(leaflet)
 library(sf)
@@ -37,6 +38,7 @@ navbarPageWithText <- function(..., text) {
 source("module_tabAOI.R")
 source("module_tabProcessing.R")
 source("module_tabWaterExtent.R")
+source("module_tabWaterDynamic.R")
 
 # User Interface
 ui <- tagList(
@@ -50,6 +52,7 @@ ui <- tagList(
     tabAOIUI("tabAOI"),
     tabProcessingUI("tabProcessing"),
     tabWaterExtentUI("tabWaterExtent"),
+    tabWaterDynamicUI("tabWaterDynamic"),
     text = textOutput("text", inline = TRUE)
   )
 )
@@ -69,6 +72,13 @@ server <- function(input, output, session) {
     tabAOIOutput,
     tabProcessingOutput
   )
+  tabWaterDynamicOutput <-  callModule(
+    tabWaterDynamic,
+    "tabWaterDynamic",
+    tabAOIOutput,
+    tabProcessingOutput,
+    tabWaterExtentOutput
+  )
   
   observe({
     #' Restrict access to tabs if content is missing
@@ -83,6 +93,13 @@ server <- function(input, output, session) {
       shinyjs::disable(selector = "#navbar li a[data-value=\"Water Extent\"]")
     } else {
       shinyjs::enable(selector = "#navbar li a[data-value=\"Water Extent\"]")
+    }
+    
+    if (!is.null(tabWaterExtentOutput()$water_extent$minimum) & 
+        !is.null(tabWaterExtentOutput()$water_extent$maximum)) {
+      shinyjs::enable(selector = "#navbar li a[data-value=\"Water Dynamic\"]")
+    } else {
+      shinyjs::disable(selector = "#navbar li a[data-value=\"Water Dynamic\"]")
     }
   })
 
