@@ -218,8 +218,48 @@ tabProcessing <- function(input, output, session, tabAOIInput) {
             )
 
             if (input$parallel) {
-
+              # Parallel calculation with tsar package
+              incProgress(0.2, detail = "Minimum")
+              
+              tsar(s, 
+                   workers=list(minimum=function(x)return(min(x, na.rm=T))), 
+                   cores=4, 
+                   out.name=path_min, 
+                   out.bandnames = NULL,
+                   out.dtype = "FLT4S", 
+                   separate = FALSE, 
+                   na.in = NA, 
+                   na.out = -999,
+                   overwrite = TRUE, 
+                   verbose = FALSE, 
+                   nodelist = NULL, 
+                   bandorder = "BSQ",
+                   maxmemory = 1000, 
+                   compress_tif = F)
+              
+              temporal_statistics[["minimum"]] <- raster(path_min)
+              
+              incProgress(0.6, detail = "Maximum")
+              
+              tsar(s, 
+                   workers=list(maximum=function(x)return(max(x, na.rm=T))), 
+                   cores=4, 
+                   out.name=path_max, 
+                   out.bandnames = NULL,
+                   out.dtype = "FLT4S", 
+                   separate = FALSE, 
+                   na.in = NA, 
+                   na.out = -999,
+                   overwrite = TRUE, 
+                   verbose = FALSE, 
+                   nodelist = NULL, 
+                   bandorder = "BSQ",
+                   maxmemory = 1000, 
+                   compress_tif = F)
+              
+              temporal_statistics[["maximum"]] <- raster(path_max)
             } else {
+              # Calculation with raster package
               incProgress(0.2, detail = "Minimum")
 
               r_minimum <- calc(s, min)

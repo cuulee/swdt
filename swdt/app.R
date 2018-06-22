@@ -21,6 +21,7 @@ library(uuid)
 library(DBI)
 library(showtext)
 library(ggplot2)
+library(tsar)
 
 # Navbar with text @daattali
 navbarPageWithText <- function(..., text) {
