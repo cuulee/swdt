@@ -6,6 +6,7 @@
 library(shiny)
 library(shinyjs)
 library(shinyWidgets)
+library(shinycssloaders)
 library(DT)
 library(leaflet)
 library(sf)
