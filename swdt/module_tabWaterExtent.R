@@ -3,9 +3,6 @@ tabWaterExtentUI <- function(id) {
   # Create a namespace
   ns <- NS(id)
 
-  # Set input width
-  input_width <- "200px"
-
   tabPanel(
     title = "Water Extent",
     id = "water_extent",
@@ -20,7 +17,7 @@ tabWaterExtentUI <- function(id) {
           numericInput(ns("threshold"),
             "Threshold",
             value = -38,
-            width = input_width
+            width = "200px"
           ),
           switchInput(ns("filter"),
             label = "Filter",
@@ -29,7 +26,7 @@ tabWaterExtentUI <- function(id) {
           numericInput(ns("filter_size"),
             label = NULL,
             value = 3,
-            width = input_width
+            width = "200px"
           ),
           actionButton(ns("classify"), "Classify")
         ),
