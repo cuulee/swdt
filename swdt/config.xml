@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+<aoi>
+  <name>Fuente</name>
+  <images>./data/fuente</images>
+  <shape>./data/fuente</shape>
+</aoi>
+</config>

@@ -23,6 +23,7 @@ library(DBI)
 library(showtext)
 library(ggplot2)
 library(tsar)
+library(xml2)
 
 # Navbar with text @daattali
 navbarPageWithText <- function(..., text) {
@@ -62,9 +63,29 @@ ui <- tagList(
 
 # Server
 server <- function(input, output, session) {
-  # Modules
-  tabAOIOutput <- callModule(tabAOI, "tabAOI")
+  read_config <- function() {
+    xml <- read_xml("./config.xml")
+    name <-
+      xml %>% 
+      xml_find_all("//aoi/name") %>% 
+      xml_text()
+    
+    image <-
+      xml %>% 
+      xml_find_all("//aoi/images") %>% 
+      xml_text()
+    
+    shape <-
+      xml %>% 
+      xml_find_all("//aoi/shape") %>% 
+      xml_text()
+    
+    return(tibble(Name = name, Image = image, Shape = shape))
+  }
   
+  # Modules
+  tabAOIOutput <- callModule(tabAOI, "tabAOI", config=read_config())
+
   tabProcessingOutput <- callModule(
     tabProcessing,
     "tabProcessing",
@@ -99,6 +120,7 @@ server <- function(input, output, session) {
   observe({
     #' Restrict access to tabs if content is missing
     #' 
+    req(tabAOIOutput()$uuid())
     if (is.na(tabAOIOutput()$uuid())) {
       shinyjs::disable(selector = "#navbar li a[data-value=Processing]")
     } else {

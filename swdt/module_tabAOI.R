@@ -14,11 +14,7 @@ tabAOIUI <- function(id) {
         ),
         panel(
           heading = "AOI",
-          selectInput(ns("aoi"),
-            choices = list("Fuente" = "fuente"),
-            label = NULL,
-            selected = "fuente"
-          ),
+          uiOutput(ns("aoi")),
           actionButton(ns("start_session"), "Start Session")
         )
       ),
@@ -31,8 +27,56 @@ tabAOIUI <- function(id) {
 }
 
 # Server
-tabAOI <- function(input, output, session) {
-  uuid <- reactiveVal(NA)
+tabAOI <- function(input, output, session, config) {
+  
+  aoi_data <- reactiveVal(NULL)
+  
+  observe({
+    #' Check configuration file
+    #'
+    true_config <-
+      config %>%
+      filter(dir.exists(Image))
+             
+    false_config <- 
+      setdiff(config, true_config)
+    
+    # Validation
+    if(nrow(true_config) == 0) {
+      showModal(
+        modalDialog("No valid path in configuration file"))
+    } else {
+      aoi_data(true_config)
+      
+      if(nrow(false_config) > 0) {
+        false_names <-
+          false_config %>%
+          dplyr::select(Name) %>%
+          pull
+        
+        showModal(
+          modalDialog(glue("No valid path in configuration file for aoi ", glue::collapse(false_names, ",", last = " and "))))
+      }
+    }
+  })
+  
+  output$aoi <- renderUI({
+    #' Render aoi selection
+    #'
+    if(is.null(aoi_data())) {
+      shinyjs::disable("start_session")
+    }
+    req(aoi_data())
+    selectInput(session$ns("aoi"),
+                choices = aoi_data()$Name,
+                label = NULL,
+                selected = aoi_data()$Name[1]
+    )
+  })
+  
+  uuid <- reactiveVal(NULL)
+  image_path <- reactiveVal(NULL)
+  shape_path <- reactiveVal(NULL)
 
   observeEvent(input$start_session, {
     #' Starts Session
@@ -43,6 +87,18 @@ tabAOI <- function(input, output, session) {
     input$aoi %>%
       glue("-", UUIDgenerate()) %>%
       uuid()
+    
+    aoi_data() %>%
+      filter(Name == input$aoi) %>%
+      dplyr::select(Image) %>%
+      pull %>%
+      image_path()
+    
+    aoi_data() %>%
+      filter(Name == input$aoi) %>%
+      dplyr::select(Shape) %>%
+      pull %>%
+      shape_path()
   })
 
   output$map <- renderLeaflet({
@@ -67,7 +123,9 @@ tabAOI <- function(input, output, session) {
     #' 
     list(
       aoi = input$aoi,
-      uuid = uuid
+      uuid = uuid,
+      image_path = image_path,
+      shape_path = shape_path
     )
   })
 

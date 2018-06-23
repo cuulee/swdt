@@ -40,8 +40,8 @@ tabProcessing <- function(input, output, session, tabAOIInput) {
   files <- reactive({
     #' Creates data table with available Sentinel-1 scenes
     #'
-    files <- list.files(glue("./data/", tabAOIInput()$aoi), "^S1")
-    paths <- list.files(glue("./data/", tabAOIInput()$aoi),
+    files <- list.files(tabAOIInput()$image_path(), "^S1")
+    paths <- list.files(tabAOIInput()$image_path(),
       "^S1",
       full.names = TRUE
     )
@@ -124,10 +124,7 @@ tabProcessing <- function(input, output, session, tabAOIInput) {
     #' Render leaflet ouput
     #'
     map <- read_sf(
-      glue(
-        "./data/",
-        tabAOIInput()$aoi
-      ),
+      tabAOIInput()$shape_path(),
       tabAOIInput()$aoi
     ) %>%
       leaflet() %>%
@@ -202,16 +199,14 @@ tabProcessing <- function(input, output, session, tabAOIInput) {
               raster::stack()
 
             path_min <- glue(
-              "./data/",
-              tabAOIInput()$aoi,
+              tabAOIInput()$image_path(),
               "/minimum/minimum-",
               tabAOIInput()$uuid(),
               ".tif"
             )
 
             path_max <- glue(
-              "./data/",
-              tabAOIInput()$aoi,
+              tabAOIInput()$image_path(),
               "/maximum/maximum-",
               tabAOIInput()$uuid(),
               ".tif"
