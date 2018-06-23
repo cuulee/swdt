@@ -51,7 +51,10 @@ ui <- tagList(
     "Sentinel-1 Water Dynamics Toolkit",
     tabAOIUI("tabAOI"),
     tabProcessingUI("tabProcessing"),
-    tabWaterExtentUI("tabWaterExtent"),
+    navbarMenu("Water Extent",
+      tabWaterExtentUI("tabWaterExtentMinimum"),
+      tabWaterExtentUI("tabWaterExtentMaximum")
+    ),
     tabWaterDynamicUI("tabWaterDynamic"),
     text = textOutput("text", inline = TRUE)
   )
@@ -61,23 +64,36 @@ ui <- tagList(
 server <- function(input, output, session) {
   # Modules
   tabAOIOutput <- callModule(tabAOI, "tabAOI")
+  
   tabProcessingOutput <- callModule(
     tabProcessing,
     "tabProcessing",
     tabAOIOutput
   )
-  tabWaterExtentOutput <- callModule(
+  
+  tabWaterExtentMinimumOutput <- callModule(
     tabWaterExtent,
-    "tabWaterExtent",
+    "tabWaterExtentMinimum",
     tabAOIOutput,
-    tabProcessingOutput
+    tabProcessingOutput,
+    mode = "minimum"
   )
+  
+  tabWaterExtentMaximumOutput <- callModule(
+    tabWaterExtent,
+    "tabWaterExtentMaximum",
+    tabAOIOutput,
+    tabProcessingOutput,
+    mode = "maximum"
+  )
+  
   tabWaterDynamicOutput <-  callModule(
     tabWaterDynamic,
     "tabWaterDynamic",
     tabAOIOutput,
     tabProcessingOutput,
-    tabWaterExtentOutput
+    tabWaterExtentMinimumOutput,
+    tabWaterExtentMaximumOutput
   )
   
   observe({
@@ -95,8 +111,8 @@ server <- function(input, output, session) {
       shinyjs::enable(selector = "#navbar li a[data-value=\"Water Extent\"]")
     }
     
-    if (!is.null(tabWaterExtentOutput()$water_extent$minimum) & 
-        !is.null(tabWaterExtentOutput()$water_extent$maximum)) {
+    if (!is.null(tabWaterExtentMinimumOutput()$water_extent) & 
+        !is.null(tabWaterExtentMaximumOutput()$water_extent)) {
       shinyjs::enable(selector = "#navbar li a[data-value=\"Water Dynamic\"]")
     } else {
       shinyjs::disable(selector = "#navbar li a[data-value=\"Water Dynamic\"]")

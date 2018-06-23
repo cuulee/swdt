@@ -40,14 +40,15 @@ tabWaterDynamic <- function(input,
                             session,
                             tabAOIInput,
                             tabProcessingInput,
-                            tabWaterExtentInput) {
+                            tabWaterExtentMinimumInput,
+                            tabWaterExtentMaximumInput) {
   compute_map <- reactive({
     #' Compute map
     #' 
     withProgress(message = "Classification", value = 0, {
       stack(
-        tabWaterExtentInput()$water_extent$minimum,
-        tabWaterExtentInput()$water_extent$maximum
+        tabWaterExtentMinimumInput()$water_extent,
+        tabWaterExtentMaximumInput()$water_extent
       ) %>%
         calc(sum) %>%
         reclassify(c(-Inf, 0, 0, 0, 1, 1, 2, Inf, 2))
