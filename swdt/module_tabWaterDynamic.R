@@ -3,33 +3,29 @@ tabWaterDynamicUI <- function(id) {
   # Create a namespace
   ns <- NS(id)
 
-  tabPanel(
-    "Water Dynamic",
-    id = "water_dynamic",
-    fluidRow(
-      column(
-        3,
-        helpText(
-          "This interface allows the creation of a water dynamic map based on the water extent maps."
-        ),
-        panel(
-          heading = "Classify",
-          colourInput(ns("color_class_0"), "Never flooded", "#f4f1e0"),
-          colourInput(ns("color_class_1"), "Temporarily flooded", "#9ecae1"),
-          colourInput(ns("color_class_2"), "Permanently flooded", "#008CBA"),
-          downloadButton(ns("download"), "Download")
-        )
+  fluidRow(
+    column(
+      3,
+      helpText(
+        "This interface allows the creation of a water dynamic map based on the water extent maps."
       ),
-      column(
-        9,
-        withSpinner(
-          leafletOutput(ns("map"),
-            height = 700,
-            width = "100%"
-          ),
-          type = 8,
-          color = "#008cba"
-        )
+      panel(
+        heading = "Classify",
+        colourInput(ns("color_class_0"), "Never flooded", "#f4f1e0"),
+        colourInput(ns("color_class_1"), "Temporarily flooded", "#9ecae1"),
+        colourInput(ns("color_class_2"), "Permanently flooded", "#008CBA"),
+        downloadButton(ns("download"), "Download")
+      )
+    ),
+    column(
+      9,
+      withSpinner(
+        leafletOutput(ns("map"),
+          height = 700,
+          width = "100%"
+        ),
+        type = 8,
+        color = "#008cba"
       )
     )
   )
@@ -44,7 +40,7 @@ tabWaterDynamic <- function(input,
                             tabWaterExtentMaximumInput) {
   compute_map <- reactive({
     #' Compute map
-    #' 
+    #'
     withProgress(message = "Classification", value = 0, {
       stack(
         tabWaterExtentMinimumInput()$water_extent,
@@ -54,7 +50,7 @@ tabWaterDynamic <- function(input,
         reclassify(c(-Inf, 0, 0, 0, 1, 1, 2, Inf, 2))
     })
   })
-  
+
   water_dynamic_map <- reactiveVal()
 
   output$map <- renderLeaflet({
@@ -99,16 +95,15 @@ tabWaterDynamic <- function(input,
         })
       )
   })
-  
+
   output$download <- downloadHandler(
     #' Download tiff file
     #'
     glue(tabAOIInput()$aoi, "-", tabAOIInput()$uuid()),
     content = function(file) {
-      res <- writeRaster(water_dynamic_map(), file, format="GTiff")
+      res <- writeRaster(water_dynamic_map(), file, format = "GTiff")
       file.rename(res@file@name, file) # Fix by @wch
     },
     contentType = "image/tiff"
   )
-  
 }

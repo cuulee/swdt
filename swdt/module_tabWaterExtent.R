@@ -3,88 +3,84 @@ tabWaterExtentUI <- function(id) {
   # Create a namespace
   ns <- NS(id)
 
-  tabPanel(
-    title = textOutput(ns("title"), inline = TRUE),
-    id = "water_extent",
-    fluidRow(
-      column(
-        3,
-        helpText(
-          "This interface allows the creation of water extent maps based on the minimum and maximum backscatter of the time series."
+  fluidRow(
+    column(
+      3,
+      helpText(
+        "This interface allows the creation of water extent maps based on the minimum and maximum backscatter of the time series."
+      ),
+      panel(
+        heading = "Classification",
+        numericInput(ns("threshold"),
+          "Threshold",
+          value = -38,
+          width = "200px"
         ),
-        panel(
-          heading = "Classification",
-          numericInput(ns("threshold"),
-            "Threshold",
-            value = -38,
-            width = "200px"
-          ),
-          switchInput(ns("filter"),
-            label = "Filter",
-            value = FALSE
-          ),
-          numericInput(ns("filter_size"),
-            label = NULL,
-            value = 3,
-            width = "200px"
-          ),
-          actionButton(ns("classify"), "Classify")
+        switchInput(ns("filter"),
+          label = "Filter",
+          value = FALSE
         ),
-        panel(
-          heading = "Radar image",
-          switchInput(
-            inputId = ns("base_raster"),
-            label = "Add",
-            value = FALSE
-          ),
-          chooseSliderSkin("Flat", color = "#008cba"),
-          sliderInput(ns("opacity"),
-            label = "Opacity", 
-            min = 0,
-            max = 1, 
-            value = 1, 
-            width = "300px"
+        numericInput(ns("filter_size"),
+          label = NULL,
+          value = 3,
+          width = "200px"
+        ),
+        actionButton(ns("classify"), "Classify")
+      ),
+      panel(
+        heading = "Radar image",
+        switchInput(
+          inputId = ns("base_raster"),
+          label = "Add",
+          value = FALSE
+        ),
+        chooseSliderSkin("Flat", color = "#008cba"),
+        sliderInput(ns("opacity"),
+          label = "Opacity",
+          min = 0,
+          max = 1,
+          value = 1,
+          width = "300px"
+        )
+      )
+    ),
+    column(
+      9,
+      fluidRow(
+        column(
+          6,
+          withSpinner(
+            plotOutput(ns("histogram"),
+              click = ns("plot_click"),
+              height = 250
+            ),
+            type = 8,
+            color = "#008cba"
+          )
+        ),
+        column(
+          1,
+          dropdownButton(
+            numericInput(ns("outlier"), "Outlier", value = 30),
+            circle = FALSE,
+            status = "default",
+            icon = NULL,
+            width = "300px",
+            size = "sm",
+            right = FALSE
+          )
+        ),
+        column(
+          5,
+          withSpinner(tableOutput(ns("statistics")),
+            type = 8,
+            color = "#008cba"
           )
         )
       ),
-      column(
-        9,
-        fluidRow(
-          column(
-            6,
-            withSpinner(
-              plotOutput(ns("histogram"),
-                click = ns("plot_click"),
-                height = 250
-              ),
-              type = 8,
-              color = "#008cba"
-            )
-          ),
-          column(
-            1,
-            dropdownButton(
-              numericInput(ns("outlier"), "Outlier", value = 30),
-              circle = FALSE,
-              status = "default",
-              icon = NULL,
-              width = "300px",
-              size = "sm",
-              right = FALSE
-            )
-          ),
-          column(
-            5,
-            withSpinner(tableOutput(ns("statistics")),
-                        type = 8,
-                        color = "#008cba"
-            )
-          )
-        ),
-        withSpinner(leafletOutput(ns("map"), height = 550, width = "100%"),
-                    type = 8,
-                    color = "#008cba"
-        )
+      withSpinner(leafletOutput(ns("map"), height = 550, width = "100%"),
+        type = 8,
+        color = "#008cba"
       )
     )
   )

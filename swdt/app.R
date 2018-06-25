@@ -50,13 +50,39 @@ ui <- tagList(
     id = "navbar",
     theme = "bootstrap.css",
     "Sentinel-1 Water Dynamics Toolkit",
-    tabAOIUI("tabAOI"),
-    tabProcessingUI("tabProcessing"),
-    navbarMenu("Water Extent",
-      tabWaterExtentUI("tabWaterExtentMinimum"),
-      tabWaterExtentUI("tabWaterExtentMaximum")
+    tabPanel(
+      title = "AOI",
+      id = "aoi",
+      value = "aoi",
+      tabAOIUI("tabAOI")
     ),
-    tabWaterDynamicUI("tabWaterDynamic"),
+    tabPanel(
+      title = "Processing",
+      id = "processing",
+      value = "processing",
+      tabProcessingUI("tabProcessing")
+    ),
+    navbarMenu(
+      "Water Extent",
+      tabPanel(
+        title = "Minimum",
+        id = "water_extent_minimum",
+        value = "water_extent_minimum",
+        tabWaterExtentUI("tabWaterExtentMinimum")
+      ),
+      tabPanel(
+        title = "Maximum",
+        id = "water_extent_maximum",
+        value = "water_extent_maximum",
+        tabWaterExtentUI("tabWaterExtentMaximum")
+      )
+    ),
+    tabPanel(
+      "Water Dynamic",
+      id = "water_dynamic",
+      value = "water_dynamic",
+      tabWaterDynamicUI("tabWaterDynamic")
+    ),
     text = textOutput("text", inline = TRUE)
   )
 )
@@ -66,32 +92,35 @@ server <- function(input, output, session) {
   read_config <- function() {
     xml <- read_xml("./config.xml")
     name <-
-      xml %>% 
-      xml_find_all("//aoi/name") %>% 
+      xml %>%
+      xml_find_all("//aoi/name") %>%
       xml_text()
-    
+
     image <-
-      xml %>% 
-      xml_find_all("//aoi/images") %>% 
+      xml %>%
+      xml_find_all("//aoi/images") %>%
       xml_text()
-    
+
     shape <-
-      xml %>% 
-      xml_find_all("//aoi/shape") %>% 
+      xml %>%
+      xml_find_all("//aoi/shape") %>%
       xml_text()
-    
+
     return(tibble(Name = name, Image = image, Shape = shape))
   }
-  
+
   # Modules
-  tabAOIOutput <- callModule(tabAOI, "tabAOI", config=read_config())
+  tabAOIOutput <- callModule(tabAOI, 
+                             "tabAOI", 
+                             config = read_config(), 
+                             app_session = session)
 
   tabProcessingOutput <- callModule(
     tabProcessing,
     "tabProcessing",
     tabAOIOutput
   )
-  
+
   tabWaterExtentMinimumOutput <- callModule(
     tabWaterExtent,
     "tabWaterExtentMinimum",
@@ -99,7 +128,7 @@ server <- function(input, output, session) {
     tabProcessingOutput,
     mode = "minimum"
   )
-  
+
   tabWaterExtentMaximumOutput <- callModule(
     tabWaterExtent,
     "tabWaterExtentMaximum",
@@ -107,8 +136,8 @@ server <- function(input, output, session) {
     tabProcessingOutput,
     mode = "maximum"
   )
-  
-  tabWaterDynamicOutput <-  callModule(
+
+  tabWaterDynamicOutput <- callModule(
     tabWaterDynamic,
     "tabWaterDynamic",
     tabAOIOutput,
@@ -116,31 +145,31 @@ server <- function(input, output, session) {
     tabWaterExtentMinimumOutput,
     tabWaterExtentMaximumOutput
   )
-  
+
   observe({
     #' Restrict access to tabs if content is missing
-    #' 
+    #'
     req(tabAOIOutput()$uuid())
     if (is.na(tabAOIOutput()$uuid())) {
       shinyjs::disable(selector = "#navbar li a[data-value=Processing]")
     } else {
       shinyjs::enable(selector = "#navbar li a[data-value=Processing]")
     }
-    
+
     if (is.null(tabProcessingOutput()$temporal_statistics$minimum)) {
       shinyjs::disable(selector = "#navbar li a[data-value=\"Water Extent\"]")
     } else {
       shinyjs::enable(selector = "#navbar li a[data-value=\"Water Extent\"]")
     }
-    
-    if (!is.null(tabWaterExtentMinimumOutput()$water_extent) & 
-        !is.null(tabWaterExtentMaximumOutput()$water_extent)) {
+
+    if (!is.null(tabWaterExtentMinimumOutput()$water_extent) &
+      !is.null(tabWaterExtentMaximumOutput()$water_extent)) {
       shinyjs::enable(selector = "#navbar li a[data-value=\"Water Dynamic\"]")
     } else {
       shinyjs::disable(selector = "#navbar li a[data-value=\"Water Dynamic\"]")
     }
   })
-
+  
   output$text <- renderText({
     #' Add session info to navbar
     #'

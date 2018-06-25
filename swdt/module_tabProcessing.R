@@ -3,33 +3,29 @@ tabProcessingUI <- function(id) {
   # Create a namespace
   ns <- NS(id)
 
-  tabPanel(
-    title = "Processing",
-    id = "processing",
-    fluidRow(
-      column(
-        4,
-        helpText(
-          "This interface allows the processing of Sentinel-1 time series to minimum and maximum backscatter raster files."
-        ),
-        panel(
-          heading = "Filter",
-          uiOutput(ns("date_range")),
-          DTOutput(ns("table")),
-          switchInput(ns("parallel"),
-            label = "Parallel",
-            value = FALSE,
-            size = "small"
-          ),
-          actionButton(ns("calculate"), "Calculate")
-        )
+  fluidRow(
+    column(
+      4,
+      helpText(
+        "This interface allows the processing of Sentinel-1 time series to minimum and maximum backscatter raster files."
       ),
-      column(
-        8,
-        leafletOutput(ns("map"),
-          height = 700,
-          width = "100%"
-        )
+      panel(
+        heading = "Filter",
+        uiOutput(ns("date_range")),
+        DTOutput(ns("table")),
+        switchInput(ns("parallel"),
+          label = "Parallel",
+          value = FALSE,
+          size = "small"
+        ),
+        actionButton(ns("calculate"), "Calculate")
+      )
+    ),
+    column(
+      8,
+      leafletOutput(ns("map"),
+        height = 700,
+        width = "100%"
       )
     )
   )
@@ -157,7 +153,7 @@ tabProcessing <- function(input, output, session, tabAOIInput) {
   observeEvent(
     #' Calculate minium and maximum backscatter raster files from time series
     #' Searches for cached data in sqlite database
-    #' 
+    #'
     input$calculate, {
       withProgress(
         message = "Calculation",
@@ -168,9 +164,9 @@ tabProcessing <- function(input, output, session, tabAOIInput) {
           con <- dbConnect(RSQLite::SQLite(),
             dbname = "./database/swdt.sqlite"
           )
-          
+
           # Create table if missing
-          if(length(dbListTables(con)) == 0) {
+          if (length(dbListTables(con)) == 0) {
             dbGetQuery(con, "CREATE TABLE temporal_statistic(
                              id INTEGER PRIMARY KEY NOT NULL,
                              aoi TEXT,
@@ -179,7 +175,7 @@ tabProcessing <- function(input, output, session, tabAOIInput) {
                              path_min TEXT,
                              path_max TEXT)")
           }
-          
+
           # Search for cached data
           res <- dbGetQuery(con, glue(
             "SELECT * FROM temporal_statistic WHERE start_time = \'",
@@ -218,43 +214,45 @@ tabProcessing <- function(input, output, session, tabAOIInput) {
             if (input$parallel) {
               # Parallel calculation with tsar package
               incProgress(0.2, detail = "Minimum")
-              
-              tsar(s, 
-                   workers=list(minimum=function(x)return(min(x, na.rm=T))), 
-                   cores=4, 
-                   out.name=path_min, 
-                   out.bandnames = NULL,
-                   out.dtype = "FLT4S", 
-                   separate = FALSE, 
-                   na.in = NA, 
-                   na.out = -999,
-                   overwrite = TRUE, 
-                   verbose = FALSE, 
-                   nodelist = NULL, 
-                   bandorder = "BSQ",
-                   maxmemory = 1000, 
-                   compress_tif = F)
-              
+
+              tsar(s,
+                workers = list(minimum = function(x) return(min(x, na.rm = T))),
+                cores = 4,
+                out.name = path_min,
+                out.bandnames = NULL,
+                out.dtype = "FLT4S",
+                separate = FALSE,
+                na.in = NA,
+                na.out = -999,
+                overwrite = TRUE,
+                verbose = FALSE,
+                nodelist = NULL,
+                bandorder = "BSQ",
+                maxmemory = 1000,
+                compress_tif = F
+              )
+
               temporal_statistics[["minimum"]] <- raster(path_min)
-              
+
               incProgress(0.6, detail = "Maximum")
-              
-              tsar(s, 
-                   workers=list(maximum=function(x)return(max(x, na.rm=T))), 
-                   cores=4, 
-                   out.name=path_max, 
-                   out.bandnames = NULL,
-                   out.dtype = "FLT4S", 
-                   separate = FALSE, 
-                   na.in = NA, 
-                   na.out = -999,
-                   overwrite = TRUE, 
-                   verbose = FALSE, 
-                   nodelist = NULL, 
-                   bandorder = "BSQ",
-                   maxmemory = 1000, 
-                   compress_tif = F)
-              
+
+              tsar(s,
+                workers = list(maximum = function(x) return(max(x, na.rm = T))),
+                cores = 4,
+                out.name = path_max,
+                out.bandnames = NULL,
+                out.dtype = "FLT4S",
+                separate = FALSE,
+                na.in = NA,
+                na.out = -999,
+                overwrite = TRUE,
+                verbose = FALSE,
+                nodelist = NULL,
+                bandorder = "BSQ",
+                maxmemory = 1000,
+                compress_tif = F
+              )
+
               temporal_statistics[["maximum"]] <- raster(path_max)
             } else {
               # Calculation with raster package
@@ -318,7 +316,7 @@ tabProcessing <- function(input, output, session, tabAOIInput) {
 
   tabProcessingOutput <- reactive({
     #' Module ouput
-    #' 
+    #'
     list(
       temporal_statistics = temporal_statistics
     )
