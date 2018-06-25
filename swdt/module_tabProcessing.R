@@ -58,51 +58,58 @@ tabProcessing <- function(input, output, session, tabAOIInput) {
       arrange(Date)
   })
 
+  start_date <- reactiveVal()
+  end_date <- reactiveVal()
+  
   output$date_range <- renderUI({
     #' Render date range input
     #'
-    start_date <- files() %>%
+    files() %>%
       dplyr::select(Date) %>%
       filter(Date == min(Date)) %>%
       slice(1) %>%
-      pull()
+      pull() %>%
+      start_date()
 
-    end_date <- files() %>%
+    files() %>%
       dplyr::select(Date) %>%
       filter(Date == max(Date)) %>%
       slice(1) %>%
-      pull()
+      pull() %>%
+      end_date()
 
     dateRangeInput(session$ns("date_range"),
       label = "Date Range",
-      start = start_date,
-      end = end_date,
+      start = isolate(start_date()),
+      end = isolate(end_date()),
       language = "de"
     )
+  })
+  
+  observeEvent(input$date_range, {
+    #' Validate date range input
+    #' 
+    if (input$date_range[1] > input$date_range[2]) {
+      showModal(
+        modalDialog("You cannot enter a start date later than the end date.")
+      )
+      updateDateRangeInput(session, "date_range", start = start_date(), end = end_date())
+    } else {
+        start_date(input$date_range[1])
+        end_date(input$date_range[2])
+      }
   })
 
   output$table <- renderDT({
     #' Render table with available Sentinel-1 scenes
     #'
-    req(input$date_range)
-
-    # Validate
-    if (input$date_range[1] > input$date_range[2]) {
-      showModal(
-        modalDialog("You cannot enter an end date later than the start date")
-      )
-      shinyjs::disable("calculate")
-    } else {
-      shinyjs::enable("calculate")
-    }
-    validate(
-      need(input$date_range[1] < input$date_range[2], FALSE)
-    )
+    req(start_date())
+    req(end_date)
 
     files() %>%
       dplyr::select("Mission", "Mode", "Date") %>%
-      filter(Date > input$date_range[1]) %>%
-      filter(Date < input$date_range[2])
+      filter(Date > start_date()) %>%
+      filter(Date < end_date())
   },
   style = "bootstrap",
   server = TRUE, selection = "single",
@@ -179,9 +186,9 @@ tabProcessing <- function(input, output, session, tabAOIInput) {
           # Search for cached data
           res <- dbGetQuery(con, glue(
             "SELECT * FROM temporal_statistic WHERE start_time = \'",
-            strftime(input$date_range[1], "%Y-%m-%dT%H:%M:%S%z"),
+            strftime(start_date(), "%Y-%m-%dT%H:%M:%S%z"),
             "\' AND end_time = \'",
-            strftime(input$date_range[2], "%Y-%m-%dT%H:%M:%S%z"),
+            strftime(end_date(), "%Y-%m-%dT%H:%M:%S%z"),
             "\' AND aoi = \'",
             tabAOIInput()$aoi,
             "\'"
@@ -191,8 +198,8 @@ tabProcessing <- function(input, output, session, tabAOIInput) {
           if (nrow(res) == 0) {
             s <-
               files() %>%
-              filter(Date > input$date_range[1]) %>%
-              filter(Date < input$date_range[2]) %>%
+              filter(Date > start_date()) %>%
+              filter(Date < end_date()) %>%
               dplyr::select("paths") %>%
               pull() %>%
               raster::stack()
@@ -279,9 +286,9 @@ tabProcessing <- function(input, output, session, tabAOIInput) {
                              path_max) VALUES (\'",
               tabAOIInput()$aoi,
               "\', \'",
-              strftime(input$date_range[1], "%Y-%m-%dT%H:%M:%S%z"),
+              strftime(start_date(), "%Y-%m-%dT%H:%M:%S%z"),
               "\', \'",
-              strftime(input$date_range[2], "%Y-%m-%dT%H:%M:%S%z"),
+              strftime(end_date(), "%Y-%m-%dT%H:%M:%S%z"),
               "\', \'",
               path_min,
               "\', \'",
