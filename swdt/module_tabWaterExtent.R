@@ -13,7 +13,7 @@ tabWaterExtentUI <- function(id) {
         heading = "Classification",
         div(style = "display: inline-block;vertical-align:top;", numericInput(ns("threshold"),
           "Threshold",
-          value = -38,
+          value = -20,
           width = "200px"
         )),
         div(
@@ -125,9 +125,12 @@ tabWaterExtent <- function(input,
     #' RenderLeaflet is trigged by the histogram and the classify button
     #' And not through value inputs
     #'
+    if (input$threshold != pass_threshold()) {
+      # Prevents reloading of histogram if just filter_size is different
+      pass_threshold(input$threshold)
+    }
     pass_filter(input$filter)
     pass_filter_size(input$filter_size)
-    pass_threshold(input$threshold)
   })
 
   observeEvent(input$plot_click$x, {
