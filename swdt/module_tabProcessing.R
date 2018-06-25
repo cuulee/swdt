@@ -32,7 +32,7 @@ tabProcessingUI <- function(id) {
 }
 
 # Server
-tabProcessing <- function(input, output, session, tabAOIInput) {
+tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
   files <- reactive({
     #' Creates data table with available Sentinel-1 scenes
     #'
@@ -60,7 +60,7 @@ tabProcessing <- function(input, output, session, tabAOIInput) {
 
   start_date <- reactiveVal()
   end_date <- reactiveVal()
-  
+
   output$date_range <- renderUI({
     #' Render date range input
     #'
@@ -85,19 +85,19 @@ tabProcessing <- function(input, output, session, tabAOIInput) {
       language = "de"
     )
   })
-  
+
   observeEvent(input$date_range, {
     #' Validate date range input
-    #' 
+    #'
     if (input$date_range[1] > input$date_range[2]) {
       showModal(
         modalDialog("You cannot enter a start date later than the end date.")
       )
       updateDateRangeInput(session, "date_range", start = start_date(), end = end_date())
     } else {
-        start_date(input$date_range[1])
-        end_date(input$date_range[2])
-      }
+      start_date(input$date_range[1])
+      end_date(input$date_range[2])
+    }
   })
 
   output$table <- renderDT({
@@ -157,11 +157,10 @@ tabProcessing <- function(input, output, session, tabAOIInput) {
 
   temporal_statistics <- reactiveValues(minimum = NULL, maximum = NULL)
 
-  observeEvent(
+  observeEvent(input$calculate, {
     #' Calculate minium and maximum backscatter raster files from time series
     #' Searches for cached data in sqlite database
     #'
-    input$calculate, {
       withProgress(
         message = "Calculation",
         detail = "Searching",
@@ -318,8 +317,23 @@ tabProcessing <- function(input, output, session, tabAOIInput) {
           }
         }
       )
+    
+    showModal(
+      modalDialog("Minimum and maximum backscatter raster files successfully calculated.",
+                  footer = tagList(
+                    modalButton("Dismiss"),
+                    actionButton(session$ns("next_tab"), "Next")
+                  ))
+    )
     }
   )
+  
+  observeEvent(input$next_tab,{
+    #' Change to water extent tab after calculation
+    #' 
+    removeModal()
+    updateTabsetPanel(app_session, inputId = "navbar", selected = "water_extent_minimum")
+  })
 
   tabProcessingOutput <- reactive({
     #' Module ouput

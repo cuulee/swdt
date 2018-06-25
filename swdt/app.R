@@ -118,7 +118,8 @@ server <- function(input, output, session) {
   tabProcessingOutput <- callModule(
     tabProcessing,
     "tabProcessing",
-    tabAOIOutput
+    tabAOIOutput,
+    app_session = session
   )
 
   tabWaterExtentMinimumOutput <- callModule(
