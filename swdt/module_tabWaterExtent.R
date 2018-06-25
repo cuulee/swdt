@@ -11,55 +11,13 @@ tabWaterExtentUI <- function(id) {
       ),
       panel(
         heading = "Classification",
-        numericInput(ns("threshold"),
+        div(style = "display: inline-block;vertical-align:top;", numericInput(ns("threshold"),
           "Threshold",
           value = -38,
           width = "200px"
-        ),
-        switchInput(ns("filter"),
-          label = "Filter",
-          value = FALSE
-        ),
-        numericInput(ns("filter_size"),
-          label = NULL,
-          value = 3,
-          width = "200px"
-        ),
-        actionButton(ns("classify"), "Classify")
-      ),
-      panel(
-        heading = "Radar image",
-        switchInput(
-          inputId = ns("base_raster"),
-          label = "Add",
-          value = FALSE
-        ),
-        chooseSliderSkin("Flat", color = "#008cba"),
-        sliderInput(ns("opacity"),
-          label = "Opacity",
-          min = 0,
-          max = 1,
-          value = 1,
-          width = "300px"
-        )
-      )
-    ),
-    column(
-      9,
-      fluidRow(
-        column(
-          6,
-          withSpinner(
-            plotOutput(ns("histogram"),
-              click = ns("plot_click"),
-              height = 250
-            ),
-            type = 8,
-            color = "#008cba"
-          )
-        ),
-        column(
-          1,
+        )),
+        div(
+          style = "display: inline-block;vertical-align:top; float:right;",
           dropdownButton(
             numericInput(ns("outlier"), "Outlier", value = 30),
             circle = FALSE,
@@ -70,15 +28,38 @@ tabWaterExtentUI <- function(id) {
             right = FALSE
           )
         ),
-        column(
-          5,
-          withSpinner(tableOutput(ns("statistics")),
-            type = 8,
-            color = "#008cba"
-          )
-        )
+        withSpinner(
+          plotOutput(ns("histogram"),
+            click = ns("plot_click"),
+            height = 250
+          ),
+          type = 8,
+          color = "#008cba"
+        ),
+        numericInput(ns("filter_size"),
+          label = "Filter",
+          value = 3,
+          width = "200px"
+        ),
+
+        switchInput(ns("filter"),
+          label = "Filter",
+          value = FALSE
+        ),
+
+        actionButton(ns("classify"), "Classify")
       ),
-      withSpinner(leafletOutput(ns("map"), height = 550, width = "100%"),
+      panel(
+        heading = "Statistics",
+        withSpinner(tableOutput(ns("statistics")),
+          type = 8,
+          color = "#008cba"
+        )
+      )
+    ),
+    column(
+      9,
+      withSpinner(leafletOutput(ns("map"), height = 700, width = "100%"),
         type = 8,
         color = "#008cba"
       )
@@ -250,25 +231,13 @@ tabWaterExtent <- function(input,
     )
 
     # Create map
-    map <- leaflet() %>%
-      addTiles()
-
-    if (input$base_raster) {
-      map <-
-        map %>%
-        addRasterImage(layer(),
-          colors = pal_sentinel,
-          project = FALSE,
-          group = "Sentinel-1"
-        )
-    }
-
-    map %>%
+    leaflet() %>%
+      addTiles() %>%
       addRasterImage(compute_water_extent(),
         colors = pal,
         project = FALSE,
         group = "Classified",
-        opacity = input$opacity
+        opacity = 1
       ) %>%
       addLegend(
         position = "topright",
