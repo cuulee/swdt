@@ -36,7 +36,7 @@ kit=function(x,breaks=length(x)){
 #' split a sequence into groups of equal size
 #' @param ne the number of elements in the sequence
 #' @param ns the number of groups
-#' @return a lsit of lists each containing the indices of the group elements
+#' @return a list of lists each containing the indices of the group elements
 stratify=function(ne,ns)split(seq(ne),cut(seq(ne),breaks=ne%/%ns,include.lowest=T))
 
 #' automatic SAR image histogram thresholding for water masking using adaptive tiling
