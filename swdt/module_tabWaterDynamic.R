@@ -21,6 +21,7 @@ tabWaterDynamicUI <- function(id) {
     ),
     column(
       9,
+      tags$style(type = "text/css", "#tabWaterDynamic-map {height: calc(100vh - 80px) !important;}"),
       withSpinner(
         leafletOutput(ns("map"),
           height = 700,

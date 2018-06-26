@@ -59,6 +59,9 @@ tabWaterExtentUI <- function(id) {
     ),
     column(
       9,
+      tags$style(type = "text/css", 
+                 "#tabWaterExtentMinimum-map {height: calc(100vh - 80px) !important;}
+                 #tabWaterExtentMaximum-map {height: calc(100vh - 80px) !important;}"),
       withSpinner(leafletOutput(ns("map"), height = 700, width = "100%"),
         type = 8,
         color = "#008cba"

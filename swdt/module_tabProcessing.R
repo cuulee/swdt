@@ -23,6 +23,7 @@ tabProcessingUI <- function(id) {
     ),
     column(
       8,
+      tags$style(type = "text/css", "#tabProcessing-map {height: calc(100vh - 80px) !important;}"),
       leafletOutput(ns("map"),
         height = 700,
         width = "100%"
