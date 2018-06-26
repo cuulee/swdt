@@ -242,11 +242,16 @@ tabWaterExtent <- function(input,
         group = "Classified",
         opacity = 1
       ) %>%
+      addRasterImage(layer(),
+                     colors = pal_sentinel,
+                     project = FALSE,
+                     group = "Radar",
+                     opacity = 1
+      ) %>%
       onRender("function(el,x,data){
-                var map = this;
+               var map = this;
                var labels = map.layerManager._byGroup.Classified;
                var opacitySlider = new L.Control.opacitySlider();
-               
                
                for (const prop in labels) {
                opacitySlider.setOpacityLayer(labels[prop]);
@@ -256,11 +261,15 @@ tabWaterExtent <- function(input,
       addLegend(
         position = "topright",
         pal = pal, values = c(0, 1),
-        title = "Water extent",
+        title = NULL,
         opacity = 1,
         labFormat = labelFormat(transform = function(x) {
           return(ifelse(x == 0, "Water", "Land"))
         })
+      ) %>%
+      addLayersControl(
+        overlayGroups = c("Radar", "Classified"),
+        options = layersControlOptions(collapsed = FALSE)
       )
   })
 
