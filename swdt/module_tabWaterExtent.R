@@ -278,7 +278,7 @@ tabWaterExtent <- function(input,
     #'
     req(compute_water_extent())
 
-    val <- getValues(compute_water_extent())
+    val <- raster::getValues(compute_water_extent())
     water_pixel <- tibble(Val = val) %>%
       filter(Val == 0) %>%
       summarise(Val = n()) %>%
