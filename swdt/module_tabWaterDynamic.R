@@ -10,10 +10,12 @@ tabWaterDynamicUI <- function(id) {
         "This interface allows the creation of a water dynamic map based on the water extent maps."
       ),
       panel(
-        heading = "Classify",
+        heading = "Visualization",
         colourInput(ns("color_class_0"), "Never flooded", "#f4f1e0"),
         colourInput(ns("color_class_1"), "Temporarily flooded", "#9ecae1"),
-        colourInput(ns("color_class_2"), "Permanently flooded", "#008CBA"),
+        colourInput(ns("color_class_2"), "Permanently flooded", "#008CBA")
+      ),
+      panel(
         downloadButton(ns("download"), "Download")
       )
     ),
