@@ -13,7 +13,7 @@ tabWaterExtentUI <- function(id) {
         heading = "Classification",
         div(style = "display: inline-block;vertical-align:top;", numericInput(ns("threshold"),
           "Threshold",
-          value = -20,
+          value = 0,
           width = "200px"
         )),
         div(
@@ -117,7 +117,21 @@ tabWaterExtent <- function(input,
 
   pass_filter_size <- reactiveVal(3)
   pass_filter <- reactiveVal(FALSE)
-  pass_threshold <- reactiveVal(-20)
+  pass_threshold <- reactiveVal(NULL)
+  
+  observe({
+    #' Calculates threshold
+    #' 
+    req(layer())
+    
+    layer() %>%
+      raster::as.matrix() %>%
+      thres.gray %>%
+      ceiling() %>%
+      pass_threshold()
+    
+    updateNumericInput(session, "threshold", value = pass_threshold())
+  })
 
   observeEvent(input$classify, {
     #' Input parameter are passed through reactive values
@@ -186,6 +200,7 @@ tabWaterExtent <- function(input,
 
   compute_water_extent <- reactive({
     req(layer())
+    req(pass_threshold())
 
     # Validation
     if (isolate(input$filter_size) %% 2 == 0) {
@@ -299,8 +314,6 @@ tabWaterExtent <- function(input,
     #' Seperated from maximum calculation to avoid unnecessary recalculation
     #' while switching between minimum and maximum tab
     #'
-    req(layer())
-
     hist_data <- suppressWarnings(
       hist(layer(), breaks = 100)
     )
@@ -315,6 +328,9 @@ tabWaterExtent <- function(input,
   output$histogram <- renderPlot({
     #' Render histogram output
     #'
+    req(layer())
+    req(pass_threshold())
+    
     # Add Open Sans font from Bootstrap layout to ggplot
     font_add_google("Open Sans", "opensans")
     showtext_auto()
