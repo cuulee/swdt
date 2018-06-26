@@ -24,6 +24,7 @@ library(showtext)
 library(ggplot2)
 library(tsar)
 library(xml2)
+library(htmlwidgets)
 
 # Navbar with text @daattali
 navbarPageWithText <- function(..., text) {
@@ -45,7 +46,11 @@ source("module_tabWaterDynamic.R")
 ui <- tagList(
   # Add custom styles
   tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")),
-  useShinyjs(),
+  tags$head(tags$script(src="lib/opacity/Control.Opacity.js")),
+  tags$head(tags$link(rel = "stylesheet", type = "text/css", href="lib/opacity/Control.Opacity.css")),
+  tags$head(tags$script(src="lib/jquery/jquery-ui-1.10.3.custom.min.js")),
+  tags$head(tags$link(rel = "stylesheet", type = "text/css", href="lib/jquery/jquery-ui-1.10.3.custom.min.css")),
+    useShinyjs(),
   navbarPageWithText(
     id = "navbar",
     theme = "bootstrap.css",

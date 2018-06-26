@@ -242,14 +242,34 @@ tabWaterExtent <- function(input,
         group = "Classified",
         opacity = 1
       ) %>%
+      addRasterImage(layer(),
+                     colors = pal_sentinel,
+                     project = FALSE,
+                     group = "Radar",
+                     opacity = 1
+      ) %>%
+      onRender("function(el,x,data){
+               var map = this;
+               var labels = map.layerManager._byGroup.Classified;
+               var opacitySlider = new L.Control.opacitySlider();
+               
+               for (const prop in labels) {
+               opacitySlider.setOpacityLayer(labels[prop]);
+               }
+               
+               map.addControl(opacitySlider);}") %>%
       addLegend(
         position = "topright",
         pal = pal, values = c(0, 1),
-        title = "Water extent",
+        title = NULL,
         opacity = 1,
         labFormat = labelFormat(transform = function(x) {
           return(ifelse(x == 0, "Water", "Land"))
         })
+      ) %>%
+      addLayersControl(
+        overlayGroups = c("Radar", "Classified"),
+        options = layersControlOptions(collapsed = FALSE)
       )
   })
 
@@ -258,7 +278,7 @@ tabWaterExtent <- function(input,
     #'
     req(compute_water_extent())
 
-    val <- getValues(compute_water_extent())
+    val <- raster::getValues(compute_water_extent())
     water_pixel <- tibble(Val = val) %>%
       filter(Val == 0) %>%
       summarise(Val = n()) %>%
