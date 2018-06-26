@@ -176,6 +176,7 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
             dbGetQuery(con, "CREATE TABLE temporal_statistic(
                              id INTEGER PRIMARY KEY NOT NULL,
                              aoi TEXT,
+                             creation_date TEXT,
                              start_time TEXT,
                              end_time TEXT,
                              path_min TEXT,
@@ -279,11 +280,14 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
             dbGetQuery(con, glue(
               "INSERT INTO temporal_statistic (
                              aoi,
+                             creation_date,
                              start_time, 
                              end_time, 
                              path_min, 
                              path_max) VALUES (\'",
               tabAOIInput()$aoi,
+              "\', \'",
+              strftime(Sys.time(), "%Y-%m-%dT%H:%M:%S%z"),
               "\', \'",
               strftime(start_date(), "%Y-%m-%dT%H:%M:%S%z"),
               "\', \'",
