@@ -232,19 +232,26 @@ tabWaterExtent <- function(input,
     water_extent(r)
     r
   })
+  
+  stretch_radar <- reactive({
+    #' Stretch radar image
+    #'
+    layer() %>%
+      stretch(minq = 0.05, maxq = 0.95)
+  })
 
   output$map <- renderLeaflet({
     #' Render leaflet ouput
     #'
     req(compute_water_extent())
-
+    
     # Map coulering
     pal <- colorFactor(c("#008cba", "#f4f1e0"),
       c(0, 1),
       na.color = "transparent"
     )
-    pal_sentinel <- colorNumeric(c("#000000", "#FFFFFF"),
-      values(layer()),
+    pal_radar <- colorNumeric(c("#000000", "#FFFFFF"),
+      values(stretch_radar()),
       na.color = "transparent"
     )
 
@@ -257,8 +264,8 @@ tabWaterExtent <- function(input,
         group = "Classified",
         opacity = 1
       ) %>%
-      addRasterImage(layer(),
-                     colors = pal_sentinel,
+      addRasterImage(stretch_radar(),
+                     colors = pal_radar,
                      project = FALSE,
                      group = "Radar",
                      opacity = 1
