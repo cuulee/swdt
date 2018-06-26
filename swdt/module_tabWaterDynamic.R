@@ -101,10 +101,9 @@ tabWaterDynamic <- function(input,
   output$download <- downloadHandler(
     #' Download tiff file
     #'
-    glue(tabAOIInput()$aoi, "-", tabAOIInput()$uuid()),
+    glue(tabAOIInput()$aoi, "-", tabAOIInput()$uuid(), ".tif"),
     content = function(file) {
-      res <- writeRaster(water_dynamic_map(), file, format = "GTiff")
-      file.rename(res@file@name, file) # Fix by @wch
+      writeRaster(water_dynamic_map(), file, format = "GTiff")
     },
     contentType = "image/tiff"
   )
