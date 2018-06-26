@@ -37,10 +37,12 @@ kit=function(x,breaks=length(x)){
 #' the image is divided into tiles, from which those with the highest standard 
 #' deviation and mean lower than that of the whole image are selected.
 #' On each of the tiles a threshold is computed for splitting the assumed bimodal histogram.
+#' Of those individual computed thresholds the mode is seen as suitable for the whole image and thus returned.
 #' see http://dx.doi.org/10.1016/j.isprsjprs.2014.07.014
 #' @param img the image matrix
 #' @param splitTileSize the size of the image tiles in pixels
 #' @param fun the function to be used for finding the threshold
+#' @return a single value for thresholding water bodies in the image
 thres.gray=function(img,splitTileSize=50,fun=kit){
   require(modeest)
   rowstrat=stratify(nrow(img),splitTileSize)
