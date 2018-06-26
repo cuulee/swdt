@@ -25,6 +25,7 @@ library(ggplot2)
 library(tsar)
 library(xml2)
 library(htmlwidgets)
+library(modeest)
 
 # Navbar with text @daattali
 navbarPageWithText <- function(..., text) {
@@ -41,6 +42,7 @@ source("module_tabAOI.R")
 source("module_tabProcessing.R")
 source("module_tabWaterExtent.R")
 source("module_tabWaterDynamic.R")
+source("thresholding.R")
 
 # User Interface
 ui <- tagList(
