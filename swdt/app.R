@@ -167,9 +167,6 @@ server <- function(input, output, session) {
   observe({
     #' Restrict access to tabs if content is missing
     #'
-    
-    print(tabAOIOutput()$uuid())
-    
     if (is.null(tabAOIOutput()$uuid())) {
       shinyjs::disable(selector = "#navbar li a[data-value=processing]")
     } else {
