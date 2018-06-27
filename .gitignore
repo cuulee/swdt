@@ -1,0 +1,10 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+packrat/lib*/
+.Rprofile
+swdt/data/
+Thumbs.db
+swdt/database/
+
