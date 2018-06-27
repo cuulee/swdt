@@ -133,7 +133,7 @@ tabWaterExtent <- function(input,
       ceiling() %>%
       pass_threshold()
     
-    updateNumericInput(session, "threshold", value = pass_threshold())
+    updateNumericInput(session, "threshold", value = isolate(pass_threshold()))
   })
 
   observeEvent(input$classify, {
