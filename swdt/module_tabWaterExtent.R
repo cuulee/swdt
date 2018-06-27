@@ -6,6 +6,7 @@ tabWaterExtentUI <- function(id) {
   fluidRow(
     column(
       3,
+      tags$head(tags$style(".leaflet-top {z-index:999!important;}")),
       helpText(
         "This interface allows the creation of water extent maps based on the minimum and maximum backscatter of the time series."
       ),
