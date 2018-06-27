@@ -48,11 +48,15 @@ source("thresholding.R")
 ui <- tagList(
   # Add custom styles
   tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")),
-  tags$head(tags$script(src="lib/opacity/Control.Opacity.js")),
-  tags$head(tags$link(rel = "stylesheet", type = "text/css", href="lib/opacity/Control.Opacity.css")),
-  tags$head(tags$script(src="lib/jquery/jquery-ui-1.10.3.custom.min.js")),
-  tags$head(tags$link(rel = "stylesheet", type = "text/css", href="lib/jquery/jquery-ui-1.10.3.custom.min.css")),
-    useShinyjs(),
+  tags$head(tags$script(src = "lib/opacity/Control.Opacity.js")),
+  tags$head(tags$link(rel = "stylesheet", 
+                      type = "text/css", 
+                      href = "lib/opacity/Control.Opacity.css")),
+  tags$head(tags$script(src = "lib/jquery/jquery-ui-1.10.3.custom.min.js")),
+  tags$head(tags$link(rel = "stylesheet", 
+                      type = "text/css", 
+                      href = "lib/jquery/jquery-ui-1.10.3.custom.min.css")),
+  useShinyjs(),
   navbarPageWithText(
     id = "navbar",
     theme = "bootstrap.css",
@@ -113,14 +117,21 @@ server <- function(input, output, session) {
       xml_find_all("//aoi/shape") %>%
       xml_text()
 
-    return(tibble(Name = name, Image = image, Shape = shape))
+    thumb <-
+      xml %>%
+      xml_find_all("//aoi/thumb") %>%
+      xml_text()
+
+
+    return(tibble(Name = name, Image = image, Shape = shape, Thumb = thumb))
   }
 
   # Modules
-  tabAOIOutput <- callModule(tabAOI, 
-                             "tabAOI", 
-                             config = read_config(), 
-                             app_session = session)
+  tabAOIOutput <- callModule(tabAOI,
+    "tabAOI",
+    config = read_config(),
+    app_session = session
+  )
 
   tabProcessingOutput <- callModule(
     tabProcessing,
@@ -177,7 +188,7 @@ server <- function(input, output, session) {
       shinyjs::disable(selector = "#navbar li a[data-value=\"Water Dynamic\"]")
     }
   })
-  
+
   output$text <- renderText({
     #' Add session info to navbar
     #'

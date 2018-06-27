@@ -4,5 +4,6 @@
   <name>Fuente</name>
   <images>./data/fuente</images>
   <shape>./data/fuente</shape>
+  <thumb>/thumb/fuente</thumb>
 </aoi>
 </config>

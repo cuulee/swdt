@@ -17,7 +17,8 @@ tabAOIUI <- function(id) {
     ),
     column(
       9,
-      tags$style(type = "text/css", "#tabAOI-map {height: calc(100vh - 80px) !important;}"),
+      tags$style(type = "text/css", 
+                 "#tabAOI-map {height: calc(100vh - 80px) !important;}"),
       leafletOutput(ns("map"), height = 700, width = "100%")
     )
   )
@@ -52,8 +53,10 @@ tabAOI <- function(input, output, session, config, app_session) {
           pull()
 
         showModal(
-          modalDialog(glue("No valid path in configuration file for aoi ", 
-                           glue::collapse(false_names, ",", last = " and ")))
+          modalDialog(glue(
+            "No valid path in configuration file for aoi ",
+            glue::collapse(false_names, ",", last = " and ")
+          ))
         )
       }
     }
@@ -76,6 +79,7 @@ tabAOI <- function(input, output, session, config, app_session) {
   uuid <- reactiveVal(NULL)
   image_path <- reactiveVal(NULL)
   shape_path <- reactiveVal(NULL)
+  thumb_path <- reactiveVal(NULL)
 
   observeEvent(input$start_session, {
     #' Starts Session
@@ -98,6 +102,12 @@ tabAOI <- function(input, output, session, config, app_session) {
       dplyr::select(Shape) %>%
       pull() %>%
       shape_path()
+
+    aoi_data() %>%
+      filter(Name == input$aoi) %>%
+      dplyr::select(Thumb) %>%
+      pull() %>%
+      thumb_path()
 
     # Change to processing tab
     updateTabsetPanel(app_session, inputId = "navbar", selected = "processing")
@@ -127,7 +137,8 @@ tabAOI <- function(input, output, session, config, app_session) {
       aoi = input$aoi,
       uuid = uuid,
       image_path = image_path,
-      shape_path = shape_path
+      shape_path = shape_path,
+      thumb_path = thumb_path
     )
   })
 
