@@ -184,6 +184,7 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
     #' Calculate minium and maximum backscatter raster files from time series
     #' Searches for cached data in sqlite database
     #'
+    shinyjs::disable("calculate")
     withProgress(
       message = "Calculation",
       detail = "Searching",
@@ -349,7 +350,7 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
         }
       }
     )
-
+    shinyjs::enable("calculate")
     showModal(
       modalDialog("Minimum and maximum backscatter raster files successfully calculated.",
         footer = tagList(
