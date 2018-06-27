@@ -188,7 +188,12 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
       message = "Calculation",
       detail = "Searching",
       value = 0, {
-
+        
+        # Create database folder
+        if(!dir.exists("./database")) {
+          dir.create("./database")
+        }
+        
         # Conntect to data base
         con <- dbConnect(RSQLite::SQLite(),
           dbname = "./database/swdt.sqlite"
