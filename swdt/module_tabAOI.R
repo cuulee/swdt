@@ -12,7 +12,8 @@ tabAOIUI <- function(id) {
       panel(
         heading = "AOI",
         uiOutput(ns("aoi")),
-        actionButton(ns("start_session"), "Start Session")
+        actionButton(ns("start_session"), "Start Session"),
+        actionButton(ns("restart_session"), "Restart Session")
       )
     ),
     column(
@@ -26,6 +27,10 @@ tabAOIUI <- function(id) {
 
 # Server
 tabAOI <- function(input, output, session, config, app_session) {
+  observe({
+    shinyjs::disable("restart_session")
+  })
+  
   aoi_data <- reactiveVal(NULL)
 
   observe({
@@ -111,6 +116,8 @@ tabAOI <- function(input, output, session, config, app_session) {
 
     # Change to processing tab
     updateTabsetPanel(app_session, inputId = "navbar", selected = "processing")
+  
+    shinyjs::enable("restart_session")
   })
 
   output$map <- renderLeaflet({
@@ -128,6 +135,10 @@ tabAOI <- function(input, output, session, config, app_session) {
         addTiles() %>%
         addPolygons(fill = FALSE, color = "#008cba")
     }
+  })
+  
+  observeEvent(input$restart_session, {
+    session$reload()
   })
 
   tabAOIOutput <- reactive({
