@@ -49,13 +49,17 @@ ui <- tagList(
   # Add custom styles
   tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")),
   tags$head(tags$script(src = "lib/opacity/Control.Opacity.js")),
-  tags$head(tags$link(rel = "stylesheet", 
-                      type = "text/css", 
-                      href = "lib/opacity/Control.Opacity.css")),
+  tags$head(tags$link(
+    rel = "stylesheet",
+    type = "text/css",
+    href = "lib/opacity/Control.Opacity.css"
+  )),
   tags$head(tags$script(src = "lib/jquery/jquery-ui-1.10.3.custom.min.js")),
-  tags$head(tags$link(rel = "stylesheet", 
-                      type = "text/css", 
-                      href = "lib/jquery/jquery-ui-1.10.3.custom.min.css")),
+  tags$head(tags$link(
+    rel = "stylesheet",
+    type = "text/css",
+    href = "lib/jquery/jquery-ui-1.10.3.custom.min.css"
+  )),
   useShinyjs(),
   navbarPageWithText(
     id = "navbar",
@@ -73,21 +77,19 @@ ui <- tagList(
       value = "processing",
       tabProcessingUI("tabProcessing")
     ),
-    navbarMenu(
-      "Water Extent",
-      tabPanel(
-        title = "Minimum",
-        id = "water_extent_minimum",
-        value = "water_extent_minimum",
-        tabWaterExtentUI("tabWaterExtentMinimum")
-      ),
-      tabPanel(
-        title = "Maximum",
-        id = "water_extent_maximum",
-        value = "water_extent_maximum",
-        tabWaterExtentUI("tabWaterExtentMaximum")
-      )
+    tabPanel(
+      title = "Water Extent Minimum ",
+      id = "water_extent_minimum",
+      value = "water_extent_minimum",
+      tabWaterExtentUI("tabWaterExtentMinimum")
     ),
+    tabPanel(
+      title = "Water Extent Maximum",
+      id = "water_extent_maximum",
+      value = "water_extent_maximum",
+      tabWaterExtentUI("tabWaterExtentMaximum")
+    )
+    ,
     tabPanel(
       "Water Dynamic",
       id = "water_dynamic",
@@ -121,7 +123,6 @@ server <- function(input, output, session) {
       xml %>%
       xml_find_all("//aoi/thumb") %>%
       xml_text()
-
 
     return(tibble(Name = name, Image = image, Shape = shape, Thumb = thumb))
   }
@@ -173,18 +174,23 @@ server <- function(input, output, session) {
     } else {
       shinyjs::enable(selector = "#navbar li a[data-value=processing]")
     }
-    
+
     if (is.null(tabProcessingOutput()$temporal_statistics$minimum)) {
-      shinyjs::disable(selector = "#navbar li a[data-value=\"Water Extent\"]")
+      shinyjs::disable(selector = "#navbar li a[data-value=\"water_extent_minimum\"]")
     } else {
-      shinyjs::enable(selector = "#navbar li a[data-value=\"Water Extent\"]")
+      shinyjs::enable(selector = "#navbar li a[data-value=\"water_extent_minimum\"]")
     }
 
-    if (!is.null(tabWaterExtentMinimumOutput()$water_extent) &
-      !is.null(tabWaterExtentMaximumOutput()$water_extent)) {
-      shinyjs::enable(selector = "#navbar li a[data-value=\"water_dynamic\"]")
+    if (is.null(tabWaterExtentMinimumOutput()$water_extent)) {
+      shinyjs::disable(selector = "#navbar li a[data-value=\"water_extent_maximum\"]")
     } else {
+      shinyjs::enable(selector = "#navbar li a[data-value=\"water_extent_maximum\"]")
+    }
+
+    if (is.null(tabWaterExtentMaximumOutput()$water_extent)) {
       shinyjs::disable(selector = "#navbar li a[data-value=\"water_dynamic\"]")
+    } else {
+      shinyjs::enable(selector = "#navbar li a[data-value=\"water_dynamic\"]")
     }
   })
 
