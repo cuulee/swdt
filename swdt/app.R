@@ -25,6 +25,7 @@ library(tsar)
 library(xml2)
 library(htmlwidgets)
 library(modeest)
+library(lubridate)
 
 # Navbar with text @daattali
 navbarPageWithText <- function(..., text) {

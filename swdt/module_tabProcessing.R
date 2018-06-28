@@ -12,6 +12,8 @@ tabProcessingUI <- function(id) {
       panel(
         heading = "Filter",
         uiOutput(ns("date_range")),
+        actionButton(ns("current_month"), "Current Month"),
+        actionButton(ns("last_month"), "Last Month"),
         DTOutput(ns("table")),
         switchInput(ns("parallel"),
           label = "Parallel",
@@ -23,8 +25,10 @@ tabProcessingUI <- function(id) {
     ),
     column(
       8,
-      tags$style(type = "text/css", 
-                 "#tabProcessing-map {height: calc(100vh - 80px) !important;}"),
+      tags$style(
+        type = "text/css",
+        "#tabProcessing-map {height: calc(100vh - 80px) !important;}"
+      ),
       leafletOutput(ns("map"),
         height = 700,
         width = "100%"
@@ -65,7 +69,7 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
 
   start_date <- reactiveVal()
   end_date <- reactiveVal()
-
+  
   output$date_range <- renderUI({
     #' Render date range input
     #'
@@ -75,22 +79,55 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
       slice(1) %>%
       pull() %>%
       start_date()
-
+    
     files() %>%
       dplyr::select(Date) %>%
       filter(Date == max(Date)) %>%
       slice(1) %>%
       pull() %>%
       end_date()
-
+    
     dateRangeInput(session$ns("date_range"),
-      label = "Date Range",
-      start = isolate(start_date()),
-      end = isolate(end_date()),
-      language = "de"
+                   label = "Date Range",
+                   start = isolate(start_date()),
+                   end = isolate(end_date()),
+                   language = "de"
     )
   })
 
+  observeEvent(input$current_month, {
+    #' Set date range to current month
+    #'
+    date <- Sys.Date()
+    day(date) <- 1
+    start_date(date)
+
+    month(date) <- month(date) + 1
+    end_date(date - 1)
+  })
+
+  observeEvent(input$last_month, {
+    #' Set date range to last month
+    #'
+    date <- Sys.Date()
+    day(date) <- 1
+    month(date) <- month(date) - 1
+    start_date(date)
+
+    month(date) <- month(date) + 1
+    end_date(date - 1)
+  })
+  
+  observe({
+    #' Update date range
+    #'
+    updateDateRangeInput(session,
+                         "date_range",
+                         start = start_date(),
+                         end = end_date()
+    )
+  })
+  
   observeEvent(input$date_range, {
     #' Validate date range input
     #'
@@ -98,7 +135,12 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
       showModal(
         modalDialog("You cannot enter a start date later than the end date.")
       )
-      updateDateRangeInput(session, "date_range", start = start_date(), end = end_date())
+      # Cannot updated by observe function because reactiveVal does not change
+      updateDateRangeInput(session,
+        "date_range",
+        start = isolate(start_date()),
+        end = isolate(end_date())
+      )
     } else {
       start_date(input$date_range[1])
       end_date(input$date_range[2])
@@ -109,7 +151,7 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
     #' Render table with available Sentinel-1 scenes
     #'
     req(start_date())
-    req(end_date)
+    req(end_date())
 
     files() %>%
       dplyr::select("Mission", "Mode", "Date") %>%
@@ -141,10 +183,12 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
       projectRaster(crs = crs("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs ")) %>%
       extent()
 
-    glue("[[", extent_raster@ymin,
-         ", ", extent_raster@xmin,
-         "], [", extent_raster@ymax, ", ", 
-         extent_raster@xmax, "]]")
+    glue(
+      "[[", extent_raster@ymin,
+      ", ", extent_raster@xmin,
+      "], [", extent_raster@ymax, ", ",
+      extent_raster@xmax, "]]"
+    )
   })
 
   output$map <- renderLeaflet({
@@ -189,12 +233,12 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
       message = "Calculation",
       detail = "Searching",
       value = 0, {
-        
+
         # Create database folder
-        if(!dir.exists("./database")) {
+        if (!dir.exists("./database")) {
           dir.create("./database")
         }
-        
+
         # Conntect to data base
         con <- dbConnect(RSQLite::SQLite(),
           dbname = "./database/swdt.sqlite"
