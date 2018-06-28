@@ -2,7 +2,7 @@
 tabWaterExtentUI <- function(id) {
   # Create a namespace
   ns <- NS(id)
-
+  
   fluidRow(
     column(
       3,
@@ -12,10 +12,11 @@ tabWaterExtentUI <- function(id) {
       ),
       panel(
         heading = "Classification",
-        div(style = "display: inline-block;vertical-align:top;", numericInput(ns("threshold"),
-          "Threshold",
-          value = 0,
-          width = "200px"
+        div(style = "display: inline-block;vertical-align:top;", 
+            numericInput(ns("threshold"),
+                         "Threshold",
+                         value = 0,
+                         width = "200px"
         )),
         div(
           style = "display: inline-block;vertical-align:top; float:right;",
@@ -31,41 +32,41 @@ tabWaterExtentUI <- function(id) {
         ),
         withSpinner(
           plotOutput(ns("histogram"),
-            click = ns("plot_click"),
-            height = 250
+                     click = ns("plot_click"),
+                     height = 250
           ),
           type = 8,
           color = "#008cba"
         ),
         numericInput(ns("filter_size"),
-          label = "Filter",
-          value = 3,
-          width = "200px"
+                     label = "Filter",
+                     value = 3,
+                     width = "200px"
         ),
-
         switchInput(ns("filter"),
-          label = "Filter",
-          value = FALSE
+                    label = "Filter",
+                    value = FALSE
         ),
-
         actionButton(ns("classify"), "Classify")
       ),
       panel(
         heading = "Statistics",
         withSpinner(tableOutput(ns("statistics")),
-          type = 8,
-          color = "#008cba"
+                    type = 8,
+                    color = "#008cba"
         )
       )
     ),
     column(
       9,
-      tags$style(type = "text/css", 
-                 "#tabWaterExtentMinimum-map {height: calc(100vh - 80px) !important;}
-                 #tabWaterExtentMaximum-map {height: calc(100vh - 80px) !important;}"),
+      tags$style(
+        type = "text/css",
+        "#tabWaterExtentMinimum-map {height: calc(100vh - 80px) !important;}
+        #tabWaterExtentMaximum-map {height: calc(100vh - 80px) !important;}"
+      ),
       withSpinner(leafletOutput(ns("map"), height = 700, width = "100%"),
-        type = 8,
-        color = "#008cba"
+                  type = 8,
+                  color = "#008cba"
       )
     )
   )
@@ -78,20 +79,20 @@ tabWaterExtent <- function(input,
                            tabProcessingInput,
                            mode) {
   layer <- reactiveVal(NULL)
-
+  
   observe({
     #' Switch between minimum and maximum
     #'
     req(tabProcessingInput()$temporal_statistics$minimum)
     req(tabProcessingInput()$temporal_statistics$maximum)
-
+    
     if (mode == "minimum") {
       layer(tabProcessingInput()$temporal_statistics$minimum)
     } else if (mode == "maximum") {
       layer(tabProcessingInput()$temporal_statistics$maximum)
     }
   })
-
+  
   output$title <- renderText({
     #' Set navbar heading
     #'
@@ -101,14 +102,14 @@ tabWaterExtent <- function(input,
       "Maximum"
     }
   })
-
+  
   observe({
     #' Deactivated input widgets at start
     #'
     shinyjs::disable("filter_size")
     shinyjs::disable("base_raster")
   })
-
+  
   observeEvent(input$filter, {
     #' Enable and disable filter size input
     #'
@@ -118,25 +119,25 @@ tabWaterExtent <- function(input,
       shinyjs::disable("filter_size")
     }
   })
-
+  
   pass_filter_size <- reactiveVal(3)
   pass_filter <- reactiveVal(FALSE)
   pass_threshold <- reactiveVal(NULL)
   
   observe({
     #' Calculates threshold
-    #' 
+    #'
     req(layer())
     
     layer() %>%
       raster::as.matrix() %>%
-      thres.gray %>%
+      thres.gray() %>%
       ceiling() %>%
       pass_threshold()
     
     updateNumericInput(session, "threshold", value = isolate(pass_threshold()))
   })
-
+  
   observeEvent(input$classify, {
     #' Input parameter are passed through reactive values
     #' Allows limited reactivity of renderLeaflet
@@ -150,31 +151,31 @@ tabWaterExtent <- function(input,
     pass_filter(input$filter)
     pass_filter_size(input$filter_size)
   })
-
+  
   observeEvent(input$plot_click$x, {
     #' Workaround by passing plot_click$x through in reavtive value
     #' plot_click$x resets to NULL after a second
     #'
     pass_filter(input$filter)
     pass_filter_size(input$filter_size)
-
+    
     if (!is.null(input$plot_click$x)) {
       pass_threshold(ceiling(input$plot_click$x))
       # Update numericInput of threshold with histogram selection
       updateNumericInput(session,
-        "threshold",
-        value = ceiling(input$plot_click$x)
+                         "threshold",
+                         value = ceiling(input$plot_click$x)
       )
     }
   })
-
+  
   water_extent <- reactiveVal(NULL)
-
+  
   classify <- function(r, threshold, filter, filter_size, updateProgress) {
     #' Classify raster files based on threshold
     #'
     updateProgress(value = 0.1, detail = "Classify")
-
+    
     r <- reclassify(r, c(
       -Inf,
       threshold,
@@ -183,10 +184,10 @@ tabWaterExtent <- function(input,
       Inf,
       1
     ))
-
+    
     if (filter) {
       updateProgress(value = 0.3, detail = "Filter")
-
+      
       r <- focal(
         x = r,
         w = matrix(
@@ -197,15 +198,15 @@ tabWaterExtent <- function(input,
         fun = median
       )
     }
-
+    
     updateProgress(value = 0.8, detail = "Write")
     return(r)
   }
-
+  
   compute_water_extent <- reactive({
     req(layer())
     req(pass_threshold())
-
+    
     # Validation
     if (isolate(input$filter_size) %% 2 == 0) {
       showModal(
@@ -215,15 +216,15 @@ tabWaterExtent <- function(input,
     validate(
       need(isolate(input$filter_size) %% 2 != 0, FALSE)
     )
-
+    
     # Initialize progressbar
     progress <- shiny::Progress$new()
     progress$set(message = "Classification", detail = "Get", value = 0)
-
+    
     updateProgress <- function(value = NULL, detail = NULL) {
       progress$set(value = value, detail = detail)
     }
-
+    
     # Classify raster
     r <- classify(
       layer(),
@@ -243,7 +244,7 @@ tabWaterExtent <- function(input,
     layer() %>%
       stretch(minq = 0.05, maxq = 0.95)
   })
-
+  
   output$map <- renderLeaflet({
     #' Render leaflet ouput
     #'
@@ -251,22 +252,22 @@ tabWaterExtent <- function(input,
     
     # Map coulering
     pal <- colorFactor(c("#008cba", "#f4f1e0"),
-      c(0, 1),
-      na.color = "transparent"
+                       c(0, 1),
+                       na.color = "transparent"
     )
     pal_radar <- colorNumeric(c("#000000", "#FFFFFF"),
-      values(stretch_radar()),
-      na.color = "transparent"
+                              values(stretch_radar()),
+                              na.color = "transparent"
     )
-
+    
     # Create map
     leaflet() %>%
       addTiles() %>%
       addRasterImage(compute_water_extent(),
-        colors = pal,
-        project = FALSE,
-        group = "Classified",
-        opacity = 1
+                     colors = pal,
+                     project = FALSE,
+                     group = "Classified",
+                     opacity = 1
       ) %>%
       addRasterImage(stretch_radar(),
                      colors = pal_radar,
@@ -297,45 +298,63 @@ tabWaterExtent <- function(input,
         overlayGroups = c("Radar", "Classified"),
         options = layersControlOptions(collapsed = FALSE)
       )
-  })
-
+})
+  
   output$statistics <- renderTable({
     #' Render table output with statistical measures
     #'
     req(compute_water_extent())
-
+    
     val <- raster::getValues(compute_water_extent())
     water_pixel <- tibble(Val = val) %>%
       filter(Val == 0) %>%
       summarise(Val = n()) %>%
       pull()
-
+    
     land_pixel <- tibble(Val = val) %>%
       filter(Val == 1) %>%
       summarise(Val = n()) %>%
       pull()
-
+    
     tibble(Measure = character(), Value = numeric()) %>%
       add_row(Measure = "Water Percentage", Value = water_pixel / (water_pixel + land_pixel)) %>%
       add_row(Measure = "Land Percentage", Value = land_pixel / (water_pixel + land_pixel))
   })
-
-  compute_histogram <- reactive({
-    #' Compute histogram based on minimum backscatter raster file
-    #' Seperated from maximum calculation to avoid unnecessary recalculation
-    #' while switching between minimum and maximum tab
+  
+  sample_raster <- reactive({
+    #' Get sample from raster file
     #'
-    hist_data <- suppressWarnings(
-      hist(layer(), breaks = 100)
-    )
-    hist_data <-
-      tibble(
-        counts = hist_data$counts,
-        breaks = hist_data$mids
-      ) %>%
-      filter(counts > input$outlier)
+    sample <- layer() %>%
+      sampleRandom(size = 10000)
+    
+    tibble(dB = sample)
   })
-
+  
+  compute_outlier <- reactive({
+    #' Compute histogram x-axis minmum and maximum
+    #'
+    plot_objekt <-
+      ggplot(sample_raster(), aes(x = dB)) +
+      geom_histogram(binwidth = 0.5)
+    
+    plot_data <- ggplot_build(plot_objekt)$data[[1]] %>%
+      filter(count > input$outlier)
+    
+    x_min <-
+      plot_data %>%
+      slice(1) %>%
+      dplyr::select(x) %>%
+      pull()
+    
+    x_max <-
+      plot_data %>%
+      slice(nrow(plot_data)) %>%
+      dplyr::select(x) %>%
+      pull()
+    
+    c(x_min = x_min, x_max = x_max)
+  })
+  
   output$histogram <- renderPlot({
     #' Render histogram output
     #'
@@ -345,20 +364,22 @@ tabWaterExtent <- function(input,
     # Add Open Sans font from Bootstrap layout to ggplot
     font_add_google("Open Sans", "opensans")
     showtext_auto()
-
+    
     # Plot histogram
-    ggplot(compute_histogram(), aes(x = breaks, y = counts, fill = counts)) +
-      geom_bar(stat = "identity", fill = "#008cba", alpha = 0.8) +
-      xlab("Backscatter") + ylab("Frequency") +
+    ggplot(sample_raster(), aes(x = dB)) +
+      geom_histogram(binwidth = 0.5, fill = "#008cba", alpha = 0.8) +
+      xlab("dB") + ylab("Frequency") +
       theme(
         text = element_text(size = 12, family = "opensans"),
         panel.background = element_rect(fill = "#ffffff"),
         axis.line = element_line(size = 1, colour = "#e7e7e7"),
         axis.ticks = element_blank()
       ) +
-      geom_vline(xintercept = pass_threshold(), size = 1)
+      geom_vline(xintercept = pass_threshold(), size = 1) +
+      coord_cartesian(xlim = c(compute_outlier()["x_min"], 
+                               compute_outlier()["x_max"]))
   })
-
+  
   tabWaterExtentOutput <- reactive({
     #' Module ouput
     #'
@@ -366,6 +387,6 @@ tabWaterExtent <- function(input,
       water_extent = water_extent()
     )
   })
-
+  
   return(tabWaterExtentOutput)
-}
+  }
