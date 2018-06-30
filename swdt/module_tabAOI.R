@@ -94,9 +94,10 @@ tabAOI <- function(input, output, session, config, app_session) {
   observeEvent(input$start_session, {
     #' Starts Session
     #'
+    req(input$aoi)
     shinyjs::disable("aoi")
     shinyjs::disable("start_session")
-
+    
     input$aoi %>%
       glue("-", UUIDgenerate()) %>%
       uuid()
