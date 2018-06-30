@@ -138,6 +138,13 @@ Source: CRAN
 Version: 0.3
 Hash: 57ccd522123b3a11c8fed1655737ae27
 
+Package: bsplus
+Source: CRAN
+Version: 0.1.1
+Hash: 9b1f91fb68fb86b5444476d543fd819a
+Requires: glue, htmltools, lubridate, magrittr, purrr, rmarkdown,
+    stringr
+
 Package: caTools
 Source: CRAN
 Version: 1.17.1
@@ -383,6 +390,12 @@ Source: CRAN
 Version: 1.0.0
 Hash: b6bbdf629f6cafa70b2d553a54a2b050
 Requires: htmltools, htmlwidgets, leaflet, magrittr, stringr
+
+Package: lubridate
+Source: CRAN
+Version: 1.7.4
+Hash: 1e63aff678159d94bb814118c02b7a93
+Requires: Rcpp, stringr
 
 Package: magic
 Source: CRAN

@@ -6,9 +6,12 @@ tabAOIUI <- function(id) {
   fluidRow(
     column(
       3,
-      helpText(
-        "This interface allows the selection of an area of interests."
-      ),
+      bs_accordion(id = glue("help_text_", id)) %>%
+        bs_set_opts(use_heading_link = TRUE, panel_type = "default") %>%
+        bs_append(
+          title = "Help",
+          content = "This interface allows the selection of an area of interests."
+        ),
       panel(
         heading = "AOI",
         uiOutput(ns("aoi")),
@@ -18,8 +21,10 @@ tabAOIUI <- function(id) {
     ),
     column(
       9,
-      tags$style(type = "text/css", 
-                 "#tabAOI-map {height: calc(100vh - 80px) !important;}"),
+      tags$style(
+        type = "text/css",
+        "#tabAOI-map {height: calc(100vh - 80px) !important;}"
+      ),
       leafletOutput(ns("map"), height = 700, width = "100%")
     )
   )
@@ -30,7 +35,7 @@ tabAOI <- function(input, output, session, config, app_session) {
   observe({
     shinyjs::disable("restart_session")
   })
-  
+
   aoi_data <- reactiveVal(NULL)
 
   observe({
@@ -116,7 +121,7 @@ tabAOI <- function(input, output, session, config, app_session) {
 
     # Change to processing tab
     updateTabsetPanel(app_session, inputId = "navbar", selected = "processing")
-  
+
     shinyjs::enable("restart_session")
   })
 
@@ -136,7 +141,7 @@ tabAOI <- function(input, output, session, config, app_session) {
         addPolygons(fill = FALSE, color = "#008cba")
     }
   })
-  
+
   observeEvent(input$restart_session, {
     session$reload()
   })

@@ -6,9 +6,15 @@ tabWaterDynamicUI <- function(id) {
   fluidRow(
     column(
       3,
-      helpText(
-        "This interface allows the creation of a water dynamic map based on the water extent maps."
-      ),
+      bs_accordion(id = glue("help_text_", id)) %>%
+        bs_set_opts(use_heading_link = TRUE, panel_type = "default") %>%
+        bs_append(
+          title = "Help",
+          content = "This interface allows the creation of a water dynamic map based on the water extent maps."
+        ),
+      tags$script(HTML(
+        glue("document.getElementById(\"help_text_", id, "-0-collapse\").classList.remove('in');")
+      )),
       panel(
         heading = "Visualization",
         colourInput(ns("color_class_0"), "Never flooded", "#f4f1e0"),
@@ -21,8 +27,10 @@ tabWaterDynamicUI <- function(id) {
     ),
     column(
       9,
-      tags$style(type = "text/css", 
-                 "#tabWaterDynamic-map {height: calc(100vh - 80px) !important;}"),
+      tags$style(
+        type = "text/css",
+        "#tabWaterDynamic-map {height: calc(100vh - 80px) !important;}"
+      ),
       withSpinner(
         leafletOutput(ns("map"),
           height = 700,

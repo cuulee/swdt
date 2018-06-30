@@ -7,9 +7,15 @@ tabWaterExtentUI <- function(id) {
     column(
       4,
       tags$head(tags$style(".leaflet-top {z-index:999!important;}")),
-      helpText(
-        "This interface allows the creation of water extent maps based on the minimum and maximum backscatter of the time series."
-      ),
+      bs_accordion(id = glue("help_text_", id)) %>%
+        bs_set_opts(use_heading_link = TRUE, panel_type = "default") %>%
+        bs_append(
+          title = "Help",
+          content = "This interface allows the creation of water extent maps based on the minimum and maximum backscatter of the time series."
+        ),
+      tags$script(HTML(
+        glue("document.getElementById(\"help_text_", id, "-0-collapse\").classList.remove('in');")
+      )),
       panel(
         heading = "Classification",
         div(
@@ -176,27 +182,28 @@ tabWaterExtent <- function(input,
       pass_filter_size(input$filter_size)
     }
   })
-  
+
   observeEvent(input$map_click, {
     #' Add raster value popups to map
     #' Help by AF7
-    #' 
+    #'
     click <- input$map_click
     if (!is.null(click)) {
-      value <- 
+      value <-
         st_point(c(click$lng, click$lat)) %>%
-        st_sfc %>%
+        st_sfc() %>%
         st_set_crs("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") %>%
         st_transform("+proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +a=6378137 +b=6378137 +towgs84=0,0,0,0,0,0,0 +units=m +nadgrids=@null +wktext +no_defs") %>%
         as_Spatial() %>%
-        raster::extract(x=r) %>%
+        raster::extract(x = r) %>%
         round(2) %>%
         as.character()
-      
+
       leafletProxy("map") %>%
-        addPopups(click$lng, click$lat, popup=glue("<b>dB:</b> ", value),
-                    options = popupOptions(closeButton = TRUE))
-  
+        addPopups(click$lng, click$lat,
+          popup = glue("<b>dB:</b> ", value),
+          options = popupOptions(closeButton = TRUE)
+        )
     }
   })
 

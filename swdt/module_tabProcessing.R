@@ -6,9 +6,15 @@ tabProcessingUI <- function(id) {
   fluidRow(
     column(
       4,
-      helpText(
-        "This interface allows the processing of Sentinel-1 time series to minimum and maximum backscatter raster files."
-      ),
+      bs_accordion(id = glue("help_text_", id)) %>%
+        bs_set_opts(use_heading_link = TRUE, panel_type = "default") %>%
+        bs_append(
+          title = "Help",
+          content = "This interface allows the processing of Sentinel-1 time series to minimum and maximum backscatter raster files."
+        ),
+      tags$script(HTML(
+        glue("document.getElementById(\"help_text_", id, "-0-collapse\").classList.remove('in');")
+      )),
       panel(
         heading = "Filter",
         uiOutput(ns("date_range")),
@@ -69,7 +75,7 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
 
   start_date <- reactiveVal()
   end_date <- reactiveVal()
-  
+
   output$date_range <- renderUI({
     #' Render date range input
     #'
@@ -79,19 +85,19 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
       slice(1) %>%
       pull() %>%
       start_date()
-    
+
     files() %>%
       dplyr::select(Date) %>%
       filter(Date == max(Date)) %>%
       slice(1) %>%
       pull() %>%
       end_date()
-    
+
     dateRangeInput(session$ns("date_range"),
-                   label = "Date Range",
-                   start = isolate(start_date()),
-                   end = isolate(end_date()),
-                   language = "de"
+      label = "Date Range",
+      start = isolate(start_date()),
+      end = isolate(end_date()),
+      language = "de"
     )
   })
 
@@ -117,17 +123,17 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
     month(date) <- month(date) + 1
     end_date(date - 1)
   })
-  
+
   observe({
     #' Update date range
     #'
     updateDateRangeInput(session,
-                         "date_range",
-                         start = start_date(),
-                         end = end_date()
+      "date_range",
+      start = start_date(),
+      end = end_date()
     )
   })
-  
+
   observeEvent(input$date_range, {
     #' Validate date range input
     #'
