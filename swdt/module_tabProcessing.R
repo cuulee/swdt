@@ -285,15 +285,27 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
 
           path_min <- glue(
             tabAOIInput()$image_path(),
-            "/minimum/minimum-",
-            tabAOIInput()$uuid(),
+            "/minimum/minimum_",
+            tabAOIInput()$aoi,
+            "_",
+            strftime(Sys.time(), "%Y-%m-%dT%H-%M-%S"),
+            "_",
+            strftime(start_date(), "%Y-%m-%d"),
+            "_",
+            strftime(end_date(), "%Y-%m-%d"),
             ".tif"
           )
 
           path_max <- glue(
             tabAOIInput()$image_path(),
             "/maximum/maximum-",
-            tabAOIInput()$uuid(),
+            tabAOIInput()$aoi,
+            "_",
+            strftime(Sys.time(), "%Y-%m-%dT%H-%M-%S"),
+            "_",
+            strftime(start_date(), "%Y-%m-%d"),
+            "_",
+            strftime(end_date(), "%Y-%m-%d"),
             ".tif"
           )
 
