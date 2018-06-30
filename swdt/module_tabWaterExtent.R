@@ -65,7 +65,7 @@ tabWaterExtentUI <- function(id) {
       ),
       panel(
         heading = "Statistics",
-        withSpinner(tableOutput(ns("statistics")),
+        withSpinner(DTOutput(ns("statistics")),
           type = 8,
           color = "#008cba"
         )
@@ -328,7 +328,7 @@ tabWaterExtent <- function(input,
       )
   })
 
-  output$statistics <- renderTable({
+  output$statistics <- renderDT({
     #' Render table output with statistical measures
     #'
     val <- raster::getValues(compute_water_extent())
@@ -342,9 +342,42 @@ tabWaterExtent <- function(input,
       summarise(Val = n()) %>%
       pull()
 
-    tibble(Measure = character(), Value = numeric()) %>%
-      add_row(Measure = "Water Percentage", Value = water_pixel / (water_pixel + land_pixel)) %>%
-      add_row(Measure = "Land Percentage", Value = land_pixel / (water_pixel + land_pixel))
+    pixel_size <-
+      compute_water_extent() %>%
+      res()
+
+
+    tibble(Class = character(), Area = numeric(), Percentage = numeric()) %>%
+      add_row(
+        Class = "Water",
+        Area = water_pixel * pixel_size[1] * pixel_size[2] * 0.0001,
+        Percentage = water_pixel / (water_pixel + land_pixel)
+      ) %>%
+      add_row(
+        Class = "Land",
+        Area = land_pixel * pixel_size[1] * pixel_size[2] * 0.0001,
+        Percentage = land_pixel / (water_pixel + land_pixel)
+      ) %>%
+      datatable(
+        colnames = c("Class", "Area [ha]", "Area [%]"),
+        style = "bootstrap",
+        filter = "none",
+        selection = "none",
+        rownames = FALSE,
+        autoHideNavigation = TRUE,
+        options = list(
+          iDisplayLength = 10,
+          aLengthMenu = c(5, 10),
+          bLengthChange = 0,
+          bFilter = 0,
+          bInfo = 0,
+          bAutoWidth = 1,
+          ordering = FALSE,
+          bPaginate = FALSE
+        )
+      ) %>%
+      formatRound("Percentage", 2) %>%
+      formatRound("Area", 0)
   })
 
   sample_raster <- reactive({
