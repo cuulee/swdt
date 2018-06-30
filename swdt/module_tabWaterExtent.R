@@ -6,7 +6,6 @@ tabWaterExtentUI <- function(id) {
   fluidRow(
     column(
       4,
-      tags$head(tags$style(".leaflet-top {z-index:999!important;}")),
       bs_accordion(id = glue("help_text_", id)) %>%
         bs_set_opts(use_heading_link = TRUE, panel_type = "default") %>%
         bs_append(
