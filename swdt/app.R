@@ -98,7 +98,8 @@ ui <- tagList(
       tabWaterDynamicUI("tabWaterDynamic")
     ),
     text = textOutput("text", inline = TRUE)
-  )
+  ),
+  tags$script(src = "navigation_modal.js")
 )
 
 # Server
@@ -192,6 +193,38 @@ server <- function(input, output, session) {
       shinyjs::disable(selector = "#navbar li a[data-value=\"water_dynamic\"]")
     } else {
       shinyjs::enable(selector = "#navbar li a[data-value=\"water_dynamic\"]")
+    }
+  })
+
+  observeEvent(input$nav_processing, {
+    if (is.null(tabAOIOutput()$uuid())) {
+      showModal(
+        modalDialog("No aoi selected.")
+      )
+    }
+  })
+
+  observeEvent(input$nav_water_extent_minimum, {
+    if (is.null(tabProcessingOutput()$temporal_statistics$minimum)) {
+      showModal(
+        modalDialog("No processing executed.")
+      )
+    }
+  })
+
+  observeEvent(input$nav_water_extent_maximum, {
+    if (is.null(tabWaterExtentMinimumOutput()$water_extent)) {
+      showModal(
+        modalDialog("No minimum water extent calculated.")
+      )
+    }
+  })
+
+  observeEvent(input$nav_water_dynamic, {
+    if (is.null(tabWaterExtentMaximumOutput()$water_extent)) {
+      showModal(
+        modalDialog("No maximum water extent calculated.")
+      )
     }
   })
 
