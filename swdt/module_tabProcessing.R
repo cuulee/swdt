@@ -17,16 +17,21 @@ tabProcessingUI <- function(id) {
       )),
       panel(
         heading = "Filter",
-        uiOutput(ns("date_range")),
-        actionButton(ns("current_month"), "Current Month"),
-        actionButton(ns("last_month"), "Last Month"),
-        DTOutput(ns("table")),
-        switchInput(ns("parallel"),
-          label = "Parallel",
-          value = FALSE,
-          size = "small"
-        ),
-        actionButton(ns("calculate"), "Calculate")
+        div(style = "display: inline-block; vertical-align:top; ",
+            uiOutput(ns("date_range"))),
+            div(style = "display: inline-block; vertical-align:bottom; ",
+                actionButton(ns("current_month"), "Current Month")),
+                div(style = "display: inline-block; vertical-align:bottom; ",
+                    actionButton(ns("last_month"), "Last Month")),
+                    DTOutput(ns("table")),
+        div(style = "display: inline-block; vertical-align:top; ",
+            actionButton(ns("calculate"), "Calculate")),
+        div(style = "display: inline-block; vertical-align:top; ",
+            switchInput(ns("parallel"),
+                        label = "Parallel",
+                        value = FALSE,
+                        size = "large"
+            ))
       )
     ),
     column(
