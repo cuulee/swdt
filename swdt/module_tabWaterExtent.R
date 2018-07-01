@@ -22,7 +22,8 @@ tabWaterExtentUI <- function(id) {
           numericInput(ns("threshold"),
             "Threshold",
             value = 0,
-            width = "200px"
+            width = "200px",
+            step = 0.5
           )
         ),
         div(
