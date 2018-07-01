@@ -10,7 +10,7 @@ tabWaterDynamicUI <- function(id) {
         bs_set_opts(use_heading_link = TRUE, panel_type = "default") %>%
         bs_append(
           title = "Help",
-          content = "This interface allows the creation of a water dynamic map based on the water extent maps."
+          content = "This interface allows the creation of a water dynamics map based on the water extent maps."
         ),
       tags$script(HTML(
         glue("document.getElementById(\"help_text_", id, "-0-collapse\").classList.remove('in');")
@@ -92,7 +92,7 @@ tabWaterDynamic <- function(input,
       addLegend(
         position = "topright",
         pal = pal, values = c(0, 1, 2),
-        title = "Water extent",
+        title = "Class",
         opacity = 1,
         labFormat = labelFormat(transform = function(x) {
           label <- tibble(Value = x) %>%

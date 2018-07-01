@@ -318,7 +318,7 @@ tabWaterExtent <- function(input,
       addLegend(
         position = "topright",
         pal = pal, values = c(0, 1),
-        title = NULL,
+        title = "Class",
         opacity = 1,
         labFormat = labelFormat(transform = function(x) {
           return(ifelse(x == 0, "Water", "Land"))

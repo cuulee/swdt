@@ -93,7 +93,7 @@ ui <- tagList(
     )
     ,
     tabPanel(
-      "Water Dynamic",
+      "Water Dynamics",
       id = "water_dynamic",
       value = "water_dynamic",
       tabWaterDynamicUI("tabWaterDynamic")

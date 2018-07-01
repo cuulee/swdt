@@ -97,7 +97,7 @@ tabAOI <- function(input, output, session, config, app_session) {
     req(input$aoi)
     shinyjs::disable("aoi")
     shinyjs::disable("start_session")
-    
+
     input$aoi %>%
       glue("-", UUIDgenerate()) %>%
       uuid()
@@ -125,9 +125,9 @@ tabAOI <- function(input, output, session, config, app_session) {
 
     shinyjs::enable("restart_session")
   })
-  
+
   shape_aoi <- reactiveVal(NULL)
-  
+
   observeEvent(input$aoi, {
     #' Read shapefile
     #'
@@ -137,12 +137,12 @@ tabAOI <- function(input, output, session, config, app_session) {
       filter(Name == input$aoi) %>%
       dplyr::select(Shape) %>%
       pull()
-    
+
     dsn <- dirname(path)
     layer <-
-     basename(path) %>%
-     file_path_sans_ext
-   
+      basename(path) %>%
+      file_path_sans_ext()
+
     read_sf(dsn, layer) %>%
       shape_aoi()
   })
@@ -152,7 +152,7 @@ tabAOI <- function(input, output, session, config, app_session) {
     #'
     req(input$aoi)
     req(shape_aoi())
-  
+
 
     if (input$aoi == "NA") {
       leaflet() %>%
