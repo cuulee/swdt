@@ -194,7 +194,7 @@ tabWaterExtent <- function(input,
         st_set_crs("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") %>%
         st_transform("+proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +a=6378137 +b=6378137 +towgs84=0,0,0,0,0,0,0 +units=m +nadgrids=@null +wktext +no_defs") %>%
         as_Spatial() %>%
-        raster::extract(x = r) %>%
+        raster::extract(x = layer()) %>%
         round(2) %>%
         as.character()
 
