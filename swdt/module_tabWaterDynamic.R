@@ -84,7 +84,7 @@ tabWaterDynamic <- function(input,
     )
 
     # Render map
-    read_sf(tabAOIInput()$shape_path(), tabAOIInput()$aoi) %>%
+    tabAOIInput()$shape_aoi() %>%
       leaflet() %>%
       addTiles() %>%
       addPolygons(fill = FALSE, color = "#008cba") %>%

@@ -27,6 +27,7 @@ library(htmlwidgets)
 library(modeest)
 library(lubridate)
 library(bsplus)
+library(tools)
 
 # Navbar with text @daattali
 navbarPageWithText <- function(..., text) {

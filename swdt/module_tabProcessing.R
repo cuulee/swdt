@@ -207,10 +207,8 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
   output$map <- renderLeaflet({
     #' Render leaflet ouput
     #'
-    map <- read_sf(
-      tabAOIInput()$shape_path(),
-      tabAOIInput()$aoi
-    ) %>%
+    map <-
+      tabAOIInput()$shape_aoi() %>%
       leaflet() %>%
       addTiles() %>%
       addPolygons(fill = FALSE, color = "#008cba")

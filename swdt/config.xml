@@ -3,7 +3,7 @@
 <aoi>
   <name>Fuente</name>
   <images>./data/fuente</images>
-  <shape>./data/fuente</shape>
+  <shape>./data/fuente/fuente.shp</shape>
   <thumbs>./www/thumb/fuente</thumbs>
 </aoi>
 </config>

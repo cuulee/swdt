@@ -125,18 +125,41 @@ tabAOI <- function(input, output, session, config, app_session) {
 
     shinyjs::enable("restart_session")
   })
+  
+  shape_aoi <- reactiveVal(NULL)
+  
+  observeEvent(input$aoi, {
+    #' Read shapefile
+    #'
+    req(input$aoi)
+
+    path <- aoi_data() %>%
+      filter(Name == input$aoi) %>%
+      dplyr::select(Shape) %>%
+      pull()
+    
+    dsn <- dirname(path)
+    layer <-
+     basename(path) %>%
+     file_path_sans_ext
+   
+    read_sf(dsn, layer) %>%
+      shape_aoi()
+  })
 
   output$map <- renderLeaflet({
     #' Render leaflet map
     #'
     req(input$aoi)
+    req(shape_aoi())
+  
 
     if (input$aoi == "NA") {
       leaflet() %>%
         setView(lng = 25.19, lat = 54.54, zoom = 4) %>%
         addTiles()
     } else {
-      read_sf(glue("./data/", input$aoi), input$aoi) %>%
+      shape_aoi() %>%
         leaflet() %>%
         addTiles() %>%
         addPolygons(fill = FALSE, color = "#008cba")
@@ -153,6 +176,7 @@ tabAOI <- function(input, output, session, config, app_session) {
     list(
       aoi = input$aoi,
       uuid = uuid,
+      shape_aoi = shape_aoi,
       image_path = image_path,
       shape_path = shape_path,
       thumb_path = thumb_path

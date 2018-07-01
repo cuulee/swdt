@@ -289,8 +289,10 @@ tabWaterExtent <- function(input,
     )
 
     # Create map
-    leaflet() %>%
+    tabAOIInput()$shape_aoi() %>%  
+      leaflet() %>%
       addTiles() %>%
+      addPolygons(fill = FALSE, color = "#008cba") %>%
       addRasterImage(compute_water_extent(),
         colors = pal,
         project = FALSE,
