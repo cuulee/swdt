@@ -123,7 +123,7 @@ server <- function(input, output, session) {
 
     thumb <-
       xml %>%
-      xml_find_all("//aoi/thumb") %>%
+      xml_find_all("//aoi/thumbs") %>%
       xml_text()
 
     return(tibble(Name = name, Image = image, Shape = shape, Thumb = thumb))

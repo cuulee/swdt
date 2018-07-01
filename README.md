@@ -24,13 +24,15 @@ After the data is pre-processed you have to add the following lines to the `conf
       <name>Fuente</name>
       <images>./data/fuente</images>
       <shape>./data/fuente</shape>
-      <thumb>/thumb/fuente</thumb>
+      <thumbs>/thumb/fuente</thumbs>
     </aoi>
 
 -   `<name>` Name of area of interest
--   `<images>` Path to Sentinel-1 raster files
+-   `<images>` Path to directory with Sentinel-1 raster files
 -   `<shape>` Path to aoi shapefile
--   `<thumb>` Path to Sentinel-1 png files
+-   `<thumbs>` Path to directory with Sentinel-1 png files
+
+`<images>` and `<shape>` can be an absolute paths or a path relative to the shiny app root. `<thumbs>` must be a folder in the `./www` folder of the shiny app.
 
 ### Features
 

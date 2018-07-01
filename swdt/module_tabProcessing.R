@@ -58,8 +58,10 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
       "^S1",
       full.names = TRUE
     )
-    thumbs <- list.files(glue("./www", tabAOIInput()$thumb_path()), "^S1")
-    thumbs <- paste0("thumb/fuente/", thumbs)
+    thumbs <- list.files(tabAOIInput()$thumb_path(), "^S1")
+    thumbs <- 
+      str_sub(tabAOIInput()$thumb_path(), 7) %>% 
+      paste0("/", thumbs)
 
     as_tibble(files) %>%
       separate(value,
