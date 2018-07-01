@@ -107,11 +107,15 @@ tabWaterDynamic <- function(input,
         })
       )
   })
-
+  
   output$download <- downloadHandler(
     #' Download tiff file
     #'
-    glue(tabAOIInput()$aoi, "-", tabAOIInput()$uuid(), ".tif"),
+    glue(tabAOIInput()$aoi, "_", 
+         strftime(tabProcessingInput()$start_date(), "%Y-%m-%d"), 
+         "_", 
+         strftime(tabProcessingInput()$end_date(), "%Y-%m-%d"),
+         ".tif"),
     content = function(file) {
       writeRaster(water_dynamic_map(), file, format = "GTiff")
     },

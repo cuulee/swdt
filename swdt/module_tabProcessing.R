@@ -439,7 +439,9 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
     #' Module ouput
     #'
     list(
-      temporal_statistics = temporal_statistics
+      temporal_statistics = temporal_statistics,
+      start_date = start_date,
+      end_date = end_date
     )
   })
 
