@@ -71,6 +71,14 @@ tabAOI <- function(input, output, session, config, app_session) {
       }
     }
   })
+  
+  pass_aoi <- reactiveVal(NULL)
+  
+  observeEvent(input$aoi, {
+    #' Workaround because restore does not work properly
+    #' 
+    pass_aoi(input$aoi)
+  })
 
   output$aoi <- renderUI({
     #' Render aoi selection
@@ -168,7 +176,11 @@ tabAOI <- function(input, output, session, config, app_session) {
     session$reload()
   })
   
+  setBookmarkExclude("start_session")
+  
   onBookmark(function(state) {
+    #' Bookmark reactive values
+    #'
     state$values$uuid <- uuid()
     state$values$shape_aoi <- shape_aoi()
     state$values$image_path <- image_path()
@@ -188,14 +200,6 @@ tabAOI <- function(input, output, session, config, app_session) {
   
   onRestored(function(state) {
     updateSelectInput(session, "aoi", selected=state$values$pass_aoi)
-  })
-  
-  
-  pass_aoi <- reactiveVal(NULL)
-  
-  observeEvent(input$aoi, {
-    #' Workaround because restore does not work properlystate
-    pass_aoi(input$aoi)
   })
 
   tabAOIOutput <- reactive({

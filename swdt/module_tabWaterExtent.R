@@ -126,6 +126,7 @@ tabWaterExtent <- function(input,
 
   pass_filter_size <- reactiveVal(3)
   pass_threshold <- reactiveVal(NULL)
+  
   calculate_threshold <- reactiveVal(TRUE)
 
   observe({
@@ -133,9 +134,10 @@ tabWaterExtent <- function(input,
     #'
     req(layer())
     
-    # Prevents automatic recalculation after restore
+    # Prevents automatic run after restore
     validate(
       need(calculate_threshold(), message=FALSE))
+    calculate_threshold(FALSE)
     
     threshold <-
       layer() %>%
@@ -146,7 +148,7 @@ tabWaterExtent <- function(input,
     threshold <- 0.5 * round(threshold / 0.5)
 
     pass_threshold(threshold)
-    calculate_threshold(FALSE)
+    
     updateNumericInput(session, "threshold", value = isolate(pass_threshold()))
   })
 
@@ -450,24 +452,22 @@ tabWaterExtent <- function(input,
       geom_vline(xintercept = pass_threshold(), size = 1)
   })
   
-  
-  
   onBookmark(function(state) {
+    #' Bookmark reactive values
+    #'
     state$values$water_extent <- water_extent()
     state$values$calculate_threshold <- calculate_threshold()
   })
   
-  restore <- reactiveVal(FALSE)
-  
   onRestore(function(state) {
+    #' Restore reactive values
+    #' 
     water_extent(state$values$water_extent)
     pass_threshold(state$input$threshold)
     pass_filter_size(state$input$filter_size)
     calculate_threshold(state$values$calculate_threshold)
   })
   
-  
-
   tabWaterExtentOutput <- reactive({
     #' Module ouput
     #'

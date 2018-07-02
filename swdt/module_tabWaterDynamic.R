@@ -108,7 +108,6 @@ tabWaterDynamic <- function(input,
       )
   })
   
-  
   observe({
     req(tabProcessingInput()$start_date())
     req(tabProcessingInput()$end_date())

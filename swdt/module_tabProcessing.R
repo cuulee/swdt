@@ -451,6 +451,9 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
     updateTabsetPanel(app_session, inputId = "navbar", selected = "water_extent_minimum")
   })
   
+  # Exclude calculate to prevent recalculation
+  setBookmarkExclude("calculate")
+  
   onBookmark(function(state) {
     #' Bookmark reactive values
     #'
@@ -461,9 +464,7 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
     state$values$files <- files()
     state$values$list_files <- list_files()
   })
-  
-  # Exclude calculate to prevent recalculation
-  setBookmarkExclude("calculate")
+
   
   onRestore(function(state) {
     #' Restore reactive values
