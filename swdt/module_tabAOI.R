@@ -94,28 +94,28 @@ tabAOI <- function(input, output, session, config, app_session) {
   observeEvent(input$start_session, {
     #' Starts Session
     #'
-    req(input$aoi)
+    req(pass_aoi())
     shinyjs::disable("aoi")
     shinyjs::disable("start_session")
 
-    input$aoi %>%
+    pass_aoi() %>%
       glue("-", UUIDgenerate()) %>%
       uuid()
 
     aoi_data() %>%
-      filter(Name == input$aoi) %>%
+      filter(Name == pass_aoi()) %>%
       dplyr::select(Image) %>%
       pull() %>%
       image_path()
 
     aoi_data() %>%
-      filter(Name == input$aoi) %>%
+      filter(Name == pass_aoi()) %>%
       dplyr::select(Shape) %>%
       pull() %>%
       shape_path()
 
     aoi_data() %>%
-      filter(Name == input$aoi) %>%
+      filter(Name == pass_aoi()) %>%
       dplyr::select(Thumb) %>%
       pull() %>%
       thumb_path()
@@ -128,13 +128,13 @@ tabAOI <- function(input, output, session, config, app_session) {
 
   shape_aoi <- reactiveVal(NULL)
 
-  observeEvent(input$aoi, {
+  observe({
     #' Read shapefile
     #'
-    req(input$aoi)
+    req(pass_aoi())
 
     path <- aoi_data() %>%
-      filter(Name == input$aoi) %>%
+      filter(Name == pass_aoi()) %>%
       dplyr::select(Shape) %>%
       pull()
 
@@ -150,11 +150,9 @@ tabAOI <- function(input, output, session, config, app_session) {
   output$map <- renderLeaflet({
     #' Render leaflet map
     #'
-    req(input$aoi)
     req(shape_aoi())
-
-
-    if (input$aoi == "NA") {
+    
+    if (is.null(pass_aoi())) {
       leaflet() %>%
         setView(lng = 25.19, lat = 54.54, zoom = 4) %>%
         addTiles()
@@ -169,12 +167,42 @@ tabAOI <- function(input, output, session, config, app_session) {
   observeEvent(input$restart_session, {
     session$reload()
   })
+  
+  onBookmark(function(state) {
+    state$values$uuid <- uuid()
+    state$values$shape_aoi <- shape_aoi()
+    state$values$image_path <- image_path()
+    state$values$shape_path <- shape_path()
+    state$values$thumb_path <- thumb_path()
+    state$values$pass_aoi <- pass_aoi()
+  })
+  
+  onRestore(function(state) {
+    uuid(state$values$uuid)
+    shape_aoi(state$values$shape_aoi) 
+    image_path(state$values$image_path)
+    shape_path(state$values$shape_path)
+    thumb_path(state$values$thumb_path)
+    pass_aoi(state$values$pass_aoi)
+  })
+  
+  onRestored(function(state) {
+    updateSelectInput(session, "aoi", selected=state$values$pass_aoi)
+  })
+  
+  
+  pass_aoi <- reactiveVal(NULL)
+  
+  observeEvent(input$aoi, {
+    #' Workaround because restore does not work properlystate
+    pass_aoi(input$aoi)
+  })
 
   tabAOIOutput <- reactive({
     #' Module output
     #'
     list(
-      aoi = input$aoi,
+      aoi = pass_aoi,
       uuid = uuid,
       shape_aoi = shape_aoi,
       image_path = image_path,

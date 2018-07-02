@@ -50,9 +50,21 @@ tabProcessingUI <- function(id) {
 
 # Server
 tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
-  files <- reactive({
+  
+  files <- reactiveVal()
+  list_files <- reactiveVal(TRUE)
+  
+  observe({
     #' Creates data table with available Sentinel-1 scenes
     #'
+    req(tabAOIInput()$image_path())
+    req(tabAOIInput()$thumb_path())
+    
+    # Prevents automatic run after restore
+    validate(
+      need(list_files(), message=FALSE))
+    list_files(FALSE)
+    
     files <- list.files(tabAOIInput()$image_path(), "^S1")
     paths <- list.files(tabAOIInput()$image_path(),
       "^S1",
@@ -77,7 +89,22 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
       cbind(paths) %>%
       cbind(thumbs) %>%
       mutate_if(is.factor, as.character) %>%
-      arrange(Date)
+      arrange(Date) %>%
+      files()
+    
+    files() %>%
+      dplyr::select(Date) %>%
+      filter(Date == min(Date)) %>%
+      slice(1) %>%
+      pull() %>%
+      start_date()
+    
+    files() %>%
+      dplyr::select(Date) %>%
+      filter(Date == max(Date)) %>%
+      slice(1) %>%
+      pull() %>%
+      end_date()
   })
 
   start_date <- reactiveVal()
@@ -86,20 +113,6 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
   output$date_range <- renderUI({
     #' Render date range input
     #'
-    files() %>%
-      dplyr::select(Date) %>%
-      filter(Date == min(Date)) %>%
-      slice(1) %>%
-      pull() %>%
-      start_date()
-
-    files() %>%
-      dplyr::select(Date) %>%
-      filter(Date == max(Date)) %>%
-      slice(1) %>%
-      pull() %>%
-      end_date()
-
     dateRangeInput(session$ns("date_range"),
       label = "Date Range",
       start = isolate(start_date()),
@@ -165,6 +178,7 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
     #'
     req(start_date())
     req(end_date())
+    req(files())
 
     files() %>%
       dplyr::select("Mission", "Mode", "Date") %>%
@@ -207,6 +221,8 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
   output$map <- renderLeaflet({
     #' Render leaflet ouput
     #'
+    req(tabAOIInput()$shape_aoi())
+    
     map <-
       tabAOIInput()$shape_aoi() %>%
       leaflet() %>%
@@ -254,7 +270,7 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
         con <- dbConnect(RSQLite::SQLite(),
           dbname = "./database/swdt.sqlite"
         )
-
+      
         # Create table if missing
         if (length(dbListTables(con)) == 0) {
           dbGetQuery(con, "CREATE TABLE temporal_statistic(
@@ -266,7 +282,7 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
                              path_min TEXT,
                              path_max TEXT)")
         }
-
+        
         # Search for cached data
         res <- dbGetQuery(con, glue(
           "SELECT * FROM temporal_statistic WHERE start_time = \'",
@@ -274,7 +290,7 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
           "\' AND end_time = \'",
           strftime(end_date(), "%Y-%m-%dT%H:%M:%S%z"),
           "\' AND aoi = \'",
-          tabAOIInput()$aoi,
+          tabAOIInput()$aoi(),
           "\'"
         ))
 
@@ -291,7 +307,7 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
           path_min <- glue(
             tabAOIInput()$image_path(),
             "/minimum/minimum_",
-            tabAOIInput()$aoi,
+            tabAOIInput()$aoi(),
             "_",
             strftime(Sys.time(), "%Y-%m-%dT%H-%M-%S"),
             "_",
@@ -304,7 +320,7 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
           path_max <- glue(
             tabAOIInput()$image_path(),
             "/maximum/maximum-",
-            tabAOIInput()$aoi,
+            tabAOIInput()$aoi(),
             "_",
             strftime(Sys.time(), "%Y-%m-%dT%H-%M-%S"),
             "_",
@@ -381,7 +397,7 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
                              end_time, 
                              path_min, 
                              path_max) VALUES (\'",
-            tabAOIInput()$aoi,
+            tabAOIInput()$aoi(),
             "\', \'",
             strftime(Sys.time(), "%Y-%m-%dT%H:%M:%S%z"),
             "\', \'",
@@ -433,6 +449,44 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
     #'
     removeModal()
     updateTabsetPanel(app_session, inputId = "navbar", selected = "water_extent_minimum")
+  })
+  
+  onBookmark(function(state) {
+    #' Bookmark reactive values
+    #'
+    state$values$temporal_statistics_minimum <- temporal_statistics[["minimum"]]
+    state$values$temporal_statistics_maximum <- temporal_statistics[["maximum"]]
+    state$values$start_date <- start_date()
+    state$values$end_date <- end_date()
+    state$values$files <- files()
+    state$values$list_files <- list_files()
+  })
+  
+  # Exclude calculate to prevent recalculation
+  setBookmarkExclude("calculate")
+  
+  onRestore(function(state) {
+    #' Restore reactive values
+    #' 
+    temporal_statistics[["minimum"]] <- state$values$temporal_statistics_minimum
+    temporal_statistics[["maximum"]] <- state$values$temporal_statistics_maximum
+    files(state$values$files)
+    list_files(state$values$list_files)
+    start_date(state$values$start_date)
+    end_date(state$values$end_date)
+  })
+  
+  onRestored(function(state) {
+    #' Restore date range input after app is ready
+    #' 
+    start_date(state$values$start_date)
+    end_date(state$values$end_date)
+    
+    updateDateRangeInput(session,
+                         "date_range",
+                         start = start_date(),
+                         end = end_date()
+    )
   })
 
   tabProcessingOutput <- reactive({

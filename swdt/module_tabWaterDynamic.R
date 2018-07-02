@@ -62,7 +62,7 @@ tabWaterDynamic <- function(input,
         reclassify(c(-Inf, 0, 0, 0, 1, 1, 2, Inf, 2))
     })
   })
-
+  
   water_dynamic_map <- reactiveVal()
 
   output$map <- renderLeaflet({
@@ -108,17 +108,25 @@ tabWaterDynamic <- function(input,
       )
   })
   
-  output$download <- downloadHandler(
-    #' Download tiff file
-    #'
-    glue(tabAOIInput()$aoi, "_", 
-         strftime(tabProcessingInput()$start_date(), "%Y-%m-%d"), 
-         "_", 
-         strftime(tabProcessingInput()$end_date(), "%Y-%m-%d"),
-         ".tif"),
-    content = function(file) {
-      writeRaster(water_dynamic_map(), file, format = "GTiff")
-    },
-    contentType = "image/tiff"
-  )
+  
+  observe({
+    req(tabProcessingInput()$start_date())
+    req(tabProcessingInput()$end_date())
+    
+    output$download <- downloadHandler(
+      #' Download tiff file
+      #'
+      glue(tabAOIInput()$aoi(), "_", 
+           strftime(tabProcessingInput()$start_date(), "%Y-%m-%d"), 
+           "_", 
+           strftime(tabProcessingInput()$end_date(), "%Y-%m-%d"),
+           ".tif"),
+      content = function(file) {
+        writeRaster(water_dynamic_map(), file, format = "GTiff")
+      },
+      contentType = "image/tiff"
+    )
+    
+  })
+
 }

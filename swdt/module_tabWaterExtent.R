@@ -126,12 +126,17 @@ tabWaterExtent <- function(input,
 
   pass_filter_size <- reactiveVal(3)
   pass_threshold <- reactiveVal(NULL)
+  calculate_threshold <- reactiveVal(TRUE)
 
   observe({
     #' Calculates threshold
     #'
     req(layer())
-
+    
+    # Prevents automatic recalculation after restore
+    validate(
+      need(calculate_threshold(), message=FALSE))
+    
     threshold <-
       layer() %>%
       raster::as.matrix() %>%
@@ -141,6 +146,7 @@ tabWaterExtent <- function(input,
     threshold <- 0.5 * round(threshold / 0.5)
 
     pass_threshold(threshold)
+    calculate_threshold(FALSE)
     updateNumericInput(session, "threshold", value = isolate(pass_threshold()))
   })
 
@@ -164,6 +170,8 @@ tabWaterExtent <- function(input,
     #' Set pass_threshold if numeric input widgets changes
     #'
     req(pass_threshold())
+    validate(need(is.numeric(input$threshold), message=FALSE))
+    
     if (input$threshold != pass_threshold()) {
       # Prevents double calculation after plot click
       pass_threshold(input$threshold)
@@ -441,6 +449,24 @@ tabWaterExtent <- function(input,
       ) +
       geom_vline(xintercept = pass_threshold(), size = 1)
   })
+  
+  
+  
+  onBookmark(function(state) {
+    state$values$water_extent <- water_extent()
+    state$values$calculate_threshold <- calculate_threshold()
+  })
+  
+  restore <- reactiveVal(FALSE)
+  
+  onRestore(function(state) {
+    water_extent(state$values$water_extent)
+    pass_threshold(state$input$threshold)
+    pass_filter_size(state$input$filter_size)
+    calculate_threshold(state$values$calculate_threshold)
+  })
+  
+  
 
   tabWaterExtentOutput <- reactive({
     #' Module ouput

@@ -47,7 +47,8 @@ source("module_tabWaterDynamic.R")
 source("thresholding.R")
 
 # User Interface
-ui <- tagList(
+ui <- function(request) {
+  tagList(
   # Add custom styles
   tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")),
   tags$head(tags$script(src = "lib/opacity/Control.Opacity.js")),
@@ -102,6 +103,7 @@ ui <- tagList(
   ),
   tags$script(src = "navigation_modal.js")
 )
+}
 
 # Server
 server <- function(input, output, session) {
@@ -228,6 +230,15 @@ server <- function(input, output, session) {
       )
     }
   })
+  
+  observe({
+    reactiveValuesToList(input)
+    session$doBookmark()
+  })
+  
+  onBookmarked(function(url) {
+    updateQueryString(url)
+  })
 
   output$text <- renderText({
     #' Add session info to navbar
@@ -238,4 +249,4 @@ server <- function(input, output, session) {
 }
 
 # Run the application
-shinyApp(ui = ui, server = server)
+shinyApp(ui = ui, server = server, enableBookmarking = "server")
