@@ -6,5 +6,5 @@ packrat/lib*/
 swdt/data/
 Thumbs.db
 swdt/database/
-
+swdt/shiny_bookmarks/
 packrat/src/
