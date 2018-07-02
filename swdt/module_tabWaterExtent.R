@@ -229,14 +229,14 @@ tabWaterExtent <- function(input,
       r <- focal(
         x = r,
         w = matrix(
-          1 / filter_size^2,
+          1,
           filter_size,
           filter_size
         ),
-        fun = median
+        fun = median,
       )
     }
-
+  
     updateProgress(value = 0.8, detail = "Write")
     return(r)
   }
