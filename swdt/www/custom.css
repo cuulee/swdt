@@ -66,3 +66,11 @@
 .col-sm-7{width:99% !important;
 }
 
+/* Change color of active navbar table*/
+.navbar-default .navbar-nav > .active > a,
+.navbar-default .navbar-nav > .active > a:hover,
+.navbar-default .navbar-nav > .active > a:focus {
+	color: #333333 !important;
+	background-color: #ffffff !important; 
+}
+
