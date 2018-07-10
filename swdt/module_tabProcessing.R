@@ -17,21 +17,28 @@ tabProcessingUI <- function(id) {
       )),
       panel(
         heading = "Filter",
-        div(style = "display: inline-block; vertical-align:top; ",
-            uiOutput(ns("date_range"))),
-            div(style = "display: inline-block; vertical-align:bottom; ",
-                actionButton(ns("current_month"), "Current Month")),
-                div(style = "display: inline-block; vertical-align:bottom; ",
-                    actionButton(ns("last_month"), "Last Month")),
-                    DTOutput(ns("table")),
-        div(style = "display: inline-block; vertical-align:top; ",
-            actionButton(ns("calculate"), "Calculate")),
-        div(style = "display: inline-block; vertical-align:top; ",
-            switchInput(ns("parallel"),
-                        label = "Parallel",
-                        value = FALSE,
-                        size = "large"
-            ))
+        uiOutput(ns("date_range")),
+        div(
+          style = "display: inline-block; vertical-align:bottom; ",
+          actionButton(ns("current_month"), "Current Month")
+        ),
+        div(
+          style = "display: inline-block; vertical-align:bottom; ",
+          actionButton(ns("last_month"), "Last Month")
+        ),
+        DTOutput(ns("table")),
+        div(
+          style = "display: inline-block; vertical-align:top; ",
+          actionButton(ns("calculate"), "Calculate")
+        ),
+        div(
+          style = "display: inline-block; vertical-align:top; ",
+          switchInput(ns("parallel"),
+            label = "Parallel",
+            value = FALSE,
+            size = "large"
+          )
+        )
       )
     ),
     column(
@@ -59,8 +66,8 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
       full.names = TRUE
     )
     thumbs <- list.files(tabAOIInput()$thumb_path(), "^S1")
-    thumbs <- 
-      str_sub(tabAOIInput()$thumb_path(), 7) %>% 
+    thumbs <-
+      str_sub(tabAOIInput()$thumb_path(), 7) %>%
       paste0("/", thumbs)
 
     as_tibble(files) %>%
@@ -87,23 +94,23 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
     #' Render date range input
     #'
     # Set date range to last available month
-    max_date <- 
+    max_date <-
       files() %>%
       dplyr::select(Date) %>%
       filter(Date == max(Date)) %>%
       pull()
-      
+
     month(max_date) <- month(max_date) + 1
     day(max_date) <- 1
     max_date <- max_date - 1
-    
+
     end_date(max_date)
-    
+
     min_date <- max_date
-    day(min_date) <- 1 
-    
+    day(min_date) <- 1
+
     start_date(min_date)
-    
+
     dateRangeInput(session$ns("date_range"),
       label = "Date Range",
       start = isolate(start_date()),

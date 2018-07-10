@@ -18,24 +18,27 @@ tabWaterExtentUI <- function(id) {
       panel(
         heading = "Classification",
         div(
-          style = "display: inline-block;vertical-align:top;",
-          numericInput(ns("threshold"),
-            "Threshold",
-            value = 0,
-            width = "200px",
-            step = 0.5
-          )
-        ),
-        div(
-          style = "display: inline-block;vertical-align:top; float:right;",
-          dropdownButton(
-            numericInput(ns("outlier"), "Outlier", value = 30),
-            circle = FALSE,
-            status = "default",
-            icon = NULL,
-            width = "300px",
-            size = "sm",
-            right = FALSE
+          style = "position:relative;",
+          div(
+            style = "vertical-align:bottom;",
+            numericInput(ns("threshold"),
+              "Threshold",
+              value = 0,
+              width = "200px",
+              step = 0.5
+            )
+          ),
+          div(
+            style = "position:absolute; bottom:0px; right:0px;",
+            dropdownButton(
+              numericInput(ns("outlier"), "Outlier", value = 30),
+              circle = FALSE,
+              status = "default",
+              icon = NULL,
+              width = "300px",
+              size = "sm",
+              right = FALSE
+            )
           )
         ),
         withSpinner(
@@ -236,7 +239,7 @@ tabWaterExtent <- function(input,
         fun = median,
       )
     }
-  
+
     updateProgress(value = 0.8, detail = "Write")
     return(r)
   }
@@ -289,7 +292,7 @@ tabWaterExtent <- function(input,
     )
 
     # Create map
-    tabAOIInput()$shape_aoi() %>%  
+    tabAOIInput()$shape_aoi() %>%
       leaflet() %>%
       addTiles() %>%
       addPolygons(fill = FALSE, color = "#008cba") %>%
