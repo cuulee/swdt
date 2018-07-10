@@ -86,20 +86,24 @@ tabProcessing <- function(input, output, session, tabAOIInput, app_session) {
   output$date_range <- renderUI({
     #' Render date range input
     #'
-    files() %>%
-      dplyr::select(Date) %>%
-      filter(Date == min(Date)) %>%
-      slice(1) %>%
-      pull() %>%
-      start_date()
-
-    files() %>%
+    # Set date range to last available month
+    max_date <- 
+      files() %>%
       dplyr::select(Date) %>%
       filter(Date == max(Date)) %>%
-      slice(1) %>%
-      pull() %>%
-      end_date()
-
+      pull()
+      
+    month(max_date) <- month(max_date) + 1
+    day(max_date) <- 1
+    max_date <- max_date - 1
+    
+    end_date(max_date)
+    
+    min_date <- max_date
+    day(min_date) <- 1 
+    
+    start_date(min_date)
+    
     dateRangeInput(session$ns("date_range"),
       label = "Date Range",
       start = isolate(start_date()),
