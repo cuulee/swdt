@@ -437,7 +437,7 @@ tabWaterExtent <- function(input,
       geom_histogram(binwidth = 0.5, fill = "#008cba", alpha = 0.8) +
       xlab("dB") + ylab("Frequency") +
       theme(
-        text = element_text(size = 12, family = "opensans"),
+        text = element_text(size = 14, family = "opensans"),
         panel.background = element_rect(fill = "#ffffff"),
         axis.line = element_line(size = 1, colour = "#e7e7e7"),
         axis.ticks = element_blank()
